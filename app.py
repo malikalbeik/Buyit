@@ -66,4 +66,15 @@ def query_db(query, args=(), one=False):
     cur.close()
     return (rv[0] if rv else None) if one else rv
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """Register user"""
+    if request.method == "POST":
 
+        insert("users", ("user_name", "hash", "name", "last_name", "email", "country", "city"), (request.form.get("username"), generate_password_hash(request.form.get("password"), method='pbkdf2:sha256', salt_length=8), request.form.get("firstname"), request.form.get("surname"), request.form.get("email"), request.form.get("country"), request.form.get("city")))
+
+        # redirect user to home page
+        return redirect(url_for("index"))
+
+    else:
+        return render_template("register.html")
