@@ -66,6 +66,51 @@ def query_db(query, args=(), one=False):
     cur.close()
     return (rv[0] if rv else None) if one else rv
 
+
+@app.route("/")
+def index():
+    """Show a list of items to buy"""
+    items = query_db("SELECT * FROM items")
+    return render_template("index.html", items = items)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Log user in"""
+
+    # Forget any user_id
+    session.clear()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            return render_template("mes.html", error = "must provide username")
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            return render_template("mes.html", error = "must provide password")
+
+        # Query database for username
+        rows = query_db("SELECT * FROM users WHERE user_name='%s';" % request.form.get("username"))
+        print(rows)
+
+        # Ensure username exists and password is correct
+        if len(rows) != 1 or not check_password_hash(rows[0][2], request.form.get("password")):
+            return render_template("mes.html", error = "password is not currect")
+
+        # Remember which user has logged in
+        session["user_id"] = rows[0][0]
+
+        # Redirect user to home page
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("login.html")
+
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
