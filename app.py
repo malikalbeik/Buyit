@@ -3,7 +3,12 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 from tempfile import mkdtemp
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 import sqlite3
+from functools import wraps
+from multiprocessing import Value
+
+counter = Value('i', 0)
 
 def login_required(f):
     """
@@ -17,6 +22,18 @@ def login_required(f):
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+
+
+# Configure files directory and allowed extensions
+UPLOAD_FOLDER = 'static/photos'
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 
 # Configure application
