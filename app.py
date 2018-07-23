@@ -38,6 +38,9 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 # Configure application
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -153,3 +156,36 @@ def register():
 
     else:
         return render_template("register.html")
+
+
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/")
+
+
+@app.route("/sell", methods=["GET", "POST"])
+@login_required
+def sell():
+    "add a listing to sell"
+    if request.method == "POST":
+        userId = session["user_id"]
+
+            
+        photo = request.files['photo']
+
+        if photo and allowed_file(photo.filename):
+            with counter.get_lock():
+                counter.value += 1
+                filename = secure_filename(photo.filename)
+                photo.save(os.path.join(app.config['UPLOAD_FOLDER'], "%d.%s" %(counter.value, filename.rsplit('.', 1)[1].lower())))
+
+        return redirect(url_for("index"))
+    
+    else:
+        return render_template("sell.html")
