@@ -11,7 +11,6 @@
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" rel="stylesheet"/>
 
         <link href="/static/styles.css" rel="stylesheet"/>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
 
         <title>{% block title %}{% endblock %}</title>
 
@@ -19,12 +18,23 @@
 
     <body>
 
-        <nav>
-
-            <ul>
-                <li>main</li>
-            </ul>
-        </nav>
+        <header>
+            <nav>
+                <h1 class="logo" ><a href="/">Buyit</a></h1>
+                {% if session.user_id %}
+                    <ul>
+                        <li class="sell_button"><a class="sell_link" href="/sell">Sell Your Stuff</a></li>
+                        <li class="logout_button"><a href="/logout">Logout</a></li>
+                        
+                    </ul>
+                {% else %}
+                    <ul>
+                        <li class="login_button"><a href="/login">Login</a></li>
+                        <li class="Register_button"><a href="/register">Register</a></li>
+                    </ul>
+                {% endif %}
+            </nav>
+        <header>
 
         {% block main %}{% endblock %}        
     </body>
