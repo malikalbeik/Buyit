@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    BuyIt: {{ item[3] }}
+{% endblock %}
+
+{% block main %}
+    <div class="item-container">
+        <div class="item-image-container">
+            <img src="../static/photos/{{ item[5] }}" alt="">
+        </div>
+        <div class="item-description-container">
+            <h3>{{ item[3] }}</h3>
+            <p>Category: {{ item[9] }}</p>
+            <p>{{ item[4] }}</p>
+            <p>{{ item[6] }}</p>
+            
+            
+        </div>
+    </div>
+{% endblock %}

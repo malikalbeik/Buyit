@@ -189,11 +189,21 @@ def sell():
     
     else:
         return render_template("sell.html", categories = CATEGORIES)
-        
+
+
+
+@app.route("/items/<int:item_id>", methods=["GET", "POST"])
+def item(item_id):
+    """See information about the current item"""
+    if request.method == "GET":
+        item = query_db("SELECT * FROM items WHERE id=%d" %item_id)
+        return render_template("item.html", item = item[0])
+
 
 @app.route("/category/<category>", methods=["GET"])
 def category(category):
     """get all the items that are from a specific category"""
     items = query_db("SELECT * FROM items WHERE category='%s'"%category)
     return render_template("index.html", items = items, categories = CATEGORIES)
+
 
