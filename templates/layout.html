@@ -7,8 +7,9 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <!-- documentation at http://getbootstrap.com/docs/4.0/, alternative themes at https://bootswatch.com/4-alpha/ -->
-        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" rel="stylesheet"/>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
         <link href="/static/styles.css" rel="stylesheet"/>
 
@@ -20,23 +21,37 @@
 
         <header>
             <nav>
-                <h1 class="logo" ><a href="/">Buyit</a></h1>
-                {% if session.user_id %}
-                    <ul>
-                        <li class="sell_button"><a class="sell_link" href="/sell">Sell Your Stuff</a></li>
-                        <li class="logout_button"><a href="/logout">Logout</a></li>
-                        
-                    </ul>
-                {% else %}
-                    <ul>
-                        <li class="login_button"><a href="/login">Login</a></li>
-                        <li class="Register_button"><a href="/register">Register</a></li>
-                    </ul>
-                {% endif %}
+                    <h1 class="logo" ><a href="/">Buyit</a></h1>
+                    <div class="search-container">
+                        <form action="/search">
+                            <input type="text" placeholder="Search.." name="search">
+                            <button type="submit"><i class="fa fa-search"></i></button>
+                        </form>
+                    </div>
+                    {% if session.user_id %}
+                        <ul>
+                            <li class="sell_button"><a class="sell_link" href="/sell">Sell Your Stuff</a></li>
+                            <li class="logout_button"><a href="/logout">Logout</a></li>
+                            
+                        </ul>
+                    {% else %}
+                        <ul>
+                            <li class="login_button"><a href="/login">Login</a></li>
+                            <li class="Register_button"><a href="/register">Register</a></li>
+                        </ul>
+                    {% endif %}
             </nav>
-        <header>
+        </header>
 
-        {% block main %}{% endblock %}        
+        <div class="container">
+            {% block main %}{% endblock %}
+        </div>
+        
+        <footer>
+            <p>All rights reserved. MALIK ALBEIK</p>
+        </footer>
+
+        <script src="{{ url_for('static', filename='app.js') }}"></script>
     </body>
 
 </html>

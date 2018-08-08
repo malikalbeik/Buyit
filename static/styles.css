@@ -1,8 +1,18 @@
-html, body {
-    width: 100%;
-    height: 100%;
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+    display: block;
 }
 
+html, body {
+    width: 100%;
+    margin: 0;
+    background-color: #f4f3f0;
+}
+
+body {
+    padding-top: 100px;
+}
 a {
     text-decoration: none;
     color: inherit;
@@ -21,6 +31,7 @@ a:hover {
     margin: 0;
     padding: 0;
     margin-left: 20px;
+    font-family: arial;
 }
 
 nav {
@@ -30,23 +41,152 @@ nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 30px;
+    margin-bottom: 0;
+    top: 0;
+    width: 100%;
+    position: fixed;
 }
 
+
+nav .search-container {
+    width: 60%;
+}
+
+nav input {
+    border-radius: 10px 0 0 10px;
+    width: calc(100% - 55px);
+}
+
+nav input[type=text] {
+    padding: 6px;
+    margin-top: 8px;
+    focnt-size: 17px;
+    border: none;
+}
+
+nav .search-container button {
+    float: right;
+    width: 39px;
+    height: 39px;
+    padding: 6px 10px;
+    margin-top: 8px;
+    margin-right: 16px;
+    background: #ddd;
+    font-size: 17px;
+    border: none;
+    cursor: pointer;
+    border-radius: 0 10px 10px 0;
+}
+
+nav input[type=text] {
+    border: 1px solid #ccc;  
+}
 ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
     overflow: hidden;
 }
-li {
+nav li {
     float: right;
 }
-li a {
+nav li a {
     display: block;
     color: white;
     text-align: center;
     font-size: 22px;
     padding: 14px 16px;
     text-decoration: none;
+}
+
+.container {
+    min-height: calc(100% - 130px);
+    margin-bottom: -50px;
+    padding: 0;
+    display: flex;
+}
+
+/* ====================================================== Items Page ====================================================== */
+
+.item-container {
+    width: 100;
+    background-color: white;
+    border-radius: 25px;
+    padding: 25px;
+    margin-bottom: 50px;
+    display: flex;
+}
+
+.item-container img {
+    width: 500px;
+    height: 500px;
+}
+
+/* ====================================================== Index Page ====================================================== */
+
+.categories {
+    list-style-type: none;
+    display: flex;
+	flex-flow: wrap;
+	justify-content: center;
+}
+
+.categories li {
+    margin: 10px 30px;
+    align-content: center;
+    text-align: center;
+}
+
+.categories img {
+    margin-bottom: 10px;
+}
+
+.categories h2 {
+    font-size: 12px;
+    text-transform: capitalize;
+}
+
+
+.items {
+    overflow: hidden;
+    margin: 0;
+    padding: 10px;
+    list-style-type: none;
+    display: flex;
+	flex-flow: wrap;
+	justify-content: center;
+}
+
+.items > li {
+    width: 200px;
+    padding: 3px;
+    background-color: white;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 4px;
+    margin: 10px;
+
+}
+.items > li  img {
+    width: 194px;
+    height: 194px;
+    border-radius: 10px;
+}
+
+/* ====================================================== footer ====================================================== */
+
+footer {
+    background-color: #444;
+    color: #aaa;
+    font-size: 8pt;
+    letter-spacing: 1px;
+    text-align: center;
+    padding: 17.5px;
+    text-transform: uppercase;
+    margin-top: 50px;
+    bottom: 0;
+}
+
+footer > p {
+    margin: 0;
 }
