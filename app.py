@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 import sqlite3
 from functools import wraps
 from multiprocessing import Value
+from datetime import datetime
 
 counter = Value('i', 0)
 
@@ -34,6 +35,7 @@ def allowed_file(filename):
 # Configure files directory and allowed extensions
 UPLOAD_FOLDER = 'static/photos'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+CATEGORIES = ["cars", "tech", "motors", "furniture", "entertainment", "clothing", "other"]
 
 
 # Configure application
@@ -104,7 +106,7 @@ def query_db(query, args=(), one=False):
 def index():
     """Show a list of items to buy"""
     items = query_db("SELECT * FROM items")
-    return render_template("index.html", items = items)
+    return render_template("index.html", items = items, categories = CATEGORIES)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -127,7 +129,6 @@ def login():
 
         # Query database for username
         rows = query_db("SELECT * FROM users WHERE user_name='%s';" % request.form.get("username"))
-        print(rows)
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0][2], request.form.get("password")):
@@ -172,20 +173,27 @@ def logout():
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
 def sell():
-    "add a listing to sell"
+    """add a listing to sell"""
     if request.method == "POST":
-        userId = session["user_id"]
-
-            
         photo = request.files['photo']
+        file_name = ""
 
         if photo and allowed_file(photo.filename):
+            file_name = "%d.%s" %(counter.value, photo.filename.rsplit('.', 1)[1].lower())
             with counter.get_lock():
                 counter.value += 1
-                filename = secure_filename(photo.filename)
-                photo.save(os.path.join(app.config['UPLOAD_FOLDER'], "%d.%s" %(counter.value, filename.rsplit('.', 1)[1].lower())))
+                photo.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
+                insert("items", ("user_id", "price", "name", "description", "photos_dir", "time", "lat", "lng", "category"), (session["user_id"], request.form.get("price"), request.form.get("title"), request.form.get("description"), file_name, str(datetime.now()), 0, 0, request.form.get("category")))
 
         return redirect(url_for("index"))
     
     else:
-        return render_template("sell.html")
+        return render_template("sell.html", categories = CATEGORIES)
+        
+
+@app.route("/category/<category>", methods=["GET"])
+def category(category):
+    """get all the items that are from a specific category"""
+    items = query_db("SELECT * FROM items WHERE category='%s'"%category)
+    return render_template("index.html", items = items, categories = CATEGORIES)
+

@@ -18,11 +18,20 @@
             </div>
 
             <div class="form-group">
-                <input class="form-control" name="description" placeholder="Descriptino" type="text"/>
+                <input class="form-control" name="description" placeholder="Description" type="text"/>
             </div>
 
             <div class="form-group">
                 <input class="form-control" name="photo" placeholder="Upload photo" type="file"/>
+            </div>
+
+            <div class="form-group">
+                <select name="category" >
+                    <option value="category" disabled selected>category</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
             </div>
 
             <div class="form-group">

@@ -5,6 +5,29 @@
 {% endblock %}
 
 {% block main %}
-    <p>this is the index</p>
-    <p>{{ items }}</p>
+
+    <div class="elements-container">
+        <ul class="categories">
+            {% for category in categories %}
+            <li>
+                <a href="/category/{{ category }}">
+                    <img src="{{ url_for('static', filename='website_photos/') }}{{ category }}.png" alt="{{ category }} category">
+                    <h2>{{ category }}</h2>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <ul class="items">
+            {% for item in items %}
+                <li>
+                    <a href="items/{{ item[0] }}">
+                        <img src="{{ url_for('static', filename='photos/') }}{{ item[5] }}" alt="TO-DO">
+                        <h3>{{ item[3] }}</h3>
+                    </a>
+                </li>
+
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}
