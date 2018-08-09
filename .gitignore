@@ -2,3 +2,4 @@
 .DS_Store
 *.pyc
 static/photos/
+static/user-avatar/
