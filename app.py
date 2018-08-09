@@ -10,6 +10,7 @@ from multiprocessing import Value
 from datetime import datetime
 
 counter = Value('i', 0)
+counter1 = Value('i', 0)
 
 def login_required(f):
     """
@@ -34,6 +35,7 @@ def allowed_file(filename):
 
 # Configure files directory and allowed extensions
 UPLOAD_FOLDER = 'static/photos'
+UPLOAD_FOLDER_AVATAR = 'static/user-avatar'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 CATEGORIES = ["cars", "tech", "motors", "furniture", "entertainment", "clothing", "other"]
 
@@ -41,6 +43,7 @@ CATEGORIES = ["cars", "tech", "motors", "furniture", "entertainment", "clothing"
 # Configure application
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER_avatar'] = UPLOAD_FOLDER_AVATAR
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
 
@@ -136,7 +139,10 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = rows[0][0]
-
+        print(rows)
+        session["user_avatar"] =  rows[0][8]
+        session["user_name"] =  request.form.get("username")
+        print (session["user_avatar"])
         # Redirect user to home page
         return redirect("/")
 
@@ -149,8 +155,20 @@ def login():
 def register():
     """Register user"""
     if request.method == "POST":
+        
 
-        insert("users", ("user_name", "hash", "name", "last_name", "email", "country", "city"), (request.form.get("username"), generate_password_hash(request.form.get("password"), method='pbkdf2:sha256', salt_length=8), request.form.get("firstname"), request.form.get("surname"), request.form.get("email"), request.form.get("country"), request.form.get("city")))
+        avatar = request.files['avatar'] if request.files['avatar'] else "default.png"
+        file_name = ""
+
+        file_name = "%d.%s" %(counter1.value, avatar.filename.rsplit('.', 1)[1].lower())
+        with counter1.get_lock():
+            counter1.value += 1
+            avatar.save(os.path.join("static/user-avatar", file_name))
+
+        insert("users", ("user_name", "hash", "name", "last_name", "email", "country", "city", "avatars_dir"),
+        (request.form.get("username"), generate_password_hash(request.form.get("password"),
+        method='pbkdf2:sha256', salt_length=8), request.form.get("firstname"), request.form.get("surname"),
+        request.form.get("email"), request.form.get("country"), request.form.get("city"), file_name))
 
         # redirect user to home page
         return redirect(url_for("index"))
@@ -207,3 +225,12 @@ def category(category):
     return render_template("index.html", items = items, categories = CATEGORIES)
 
 
+
+@app.route("/search", methods=["GET"])
+def search():
+    """search for s specific item"""
+    searchword = request.args.get('search', '')
+    if not searchword:
+        return render_template("mes.html", error = "must provide a search query")
+    items = query_db("SELECT * FROM items WHERE name LIKE '%{}%'".format(searchword))
+    return render_template("index.html", items = items, categories = CATEGORIES)
