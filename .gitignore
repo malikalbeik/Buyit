@@ -3,3 +3,4 @@
 *.pyc
 static/photos/
 static/user-avatar/
+static/node_modules/
