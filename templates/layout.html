@@ -11,6 +11,10 @@
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
+        <link rel="stylesheet" href="/static/node_modules/awesomplete/awesomplete.css" />
+
+        <script src="/static/node_modules/awesomplete/awesomplete.js" async></script>
+
         <link href="/static/styles.css" rel="stylesheet"/>
 
         <title>{% block title %}{% endblock %}</title>
@@ -25,7 +29,7 @@
                     <h1 class="logo" ><a href="/">Buyit</a></h1>
                     <div class="search-container">
                         <form action="/search">
-                            <input type="text" placeholder="Search.." name="search">
+                            <input type="text" placeholder="Search.." name="search" id="searchInput">
                             <button type="submit"><i class="fa fa-search"></i></button>
                         </form>
                     </div>
@@ -57,6 +61,7 @@
 
         </div>
 
+        {% if session.user_id %}
         <div class="sideMenu">
             <div>
                 <img src="{{ url_for('static', filename='user-avatar/') }}{{ session.user_avatar }}" alt="users avatar">
@@ -70,8 +75,9 @@
                 <li><a href="/about"><img src="{{ url_for('static', filename='website_photos/about.png') }}" alt="about Buyit photo"> About Buyit</a></li>
             </ul>
         </div>
+        {% endif %}
 
-        <script src="{{ url_for('static', filename='app.js') }}"></script>
+        <script src="{{ url_for('static', filename='app.js') }}" async></script>
     </body>
 
 </html>

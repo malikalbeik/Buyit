@@ -1,5 +1,5 @@
 import os
-from flask import Flask, flash, redirect, render_template, request, session, url_for, g
+from flask import Flask, flash, redirect, render_template, request, session, url_for, g, jsonify
 from tempfile import mkdtemp
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -230,7 +230,17 @@ def category(category):
 def search():
     """search for s specific item"""
     searchword = request.args.get('search', '')
-    if not searchword:
-        return render_template("mes.html", error = "must provide a search query")
-    items = query_db("SELECT * FROM items WHERE name LIKE '%{}%'".format(searchword))
-    return render_template("index.html", items = items, categories = CATEGORIES)
+    json = request.args.get('json', '')
+
+    if not json:
+        if not searchword:
+            return render_template("mes.html", error = "must provide a search query")
+        items = query_db("SELECT * FROM items WHERE name LIKE '%{}%'".format(searchword))
+        return render_template("index.html", items = items, categories = CATEGORIES)
+    else:
+        if not searchword:
+            return 0
+        items = query_db("SELECT name FROM items WHERE name LIKE '%{}%'".format(searchword))
+        response = jsonify(items)
+        response.status_code = 200
+        return response
