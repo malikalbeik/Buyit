@@ -9,7 +9,7 @@ from tempfile import mkdtemp
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, redirect, render_template, request, session, url_for, jsonify
-from helpers import login_required, allowed_file, insert, query_db, close_connection
+from helpers import login_required, allowed_file, insert, query_db, close_connection, update
 
 
 
@@ -199,3 +199,20 @@ def search():
     response = jsonify(items)
     response.status_code = 200
     return response
+
+
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    """Show the user information and let the user change it """
+    if request.method == "GET":
+        user = query_db("SELECT * FROM users WHERE id={}".format(session["user_id"]))[0]
+        return render_template("profile.html", user=user)
+    
+    update('users', 'id = {}'.format(session["user_id"]) ,(
+        'name', 'last_name', 'email'), ( \
+            request.form.get("firstname"), \
+            request.form.get("lastname"), \
+            request.form.get("email")))
+    return render_template("mes.html", error="the database was changed")
+
