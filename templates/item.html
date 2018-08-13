@@ -7,13 +7,13 @@
 {% block main %}
     <div class="item-container">
         <div class="item-image-container">
-            <img src="../static/photos/{{ item[5] }}" alt="">
+            <img src="../static/photos/{{ item['photos_dir'] }}" alt="">
         </div>
         <div class="item-description-container">
-            <h3>{{ item[3] }}</h3>
-            <p>Category: {{ item[9] }}</p>
-            <p>{{ item[4] }}</p>
-            <p>{{ item[6] }}</p>
+            <h3>{{ item['name'] }}</h3>
+            <p>Category: {{ item['category'] }}</p>
+            <p>{{ item['description'] }}</p>
+            <p>{{ item['time'] }}</p>
             
             
         </div>

@@ -20,9 +20,9 @@
         <ul class="items">
             {% for item in items %}
                 <li>
-                    <a href="items/{{ item[0] }}">
-                        <img src="{{ url_for('static', filename='photos/') }}{{ item[5] }}" alt="TO-DO">
-                        <h3>{{ item[3] }}</h3>
+                    <a href="items/{{ item['id'] }}">
+                        <img src="{{ url_for('static', filename='photos/') }}{{ item['photos_dir'] }}" alt="TO-DO">
+                        <h3>{{ item['name'] }}</h3>
                     </a>
                 </li>
 

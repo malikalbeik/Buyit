@@ -1,47 +1,29 @@
+"""
+This is app.py the main file for flask to run.
+Here all the routes of the app are defined and setup.
+"""
 import os
-from flask import Flask, flash, redirect, render_template, request, session, url_for, g, jsonify
+from datetime import datetime
+from multiprocessing import Value
 from tempfile import mkdtemp
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
-from werkzeug.utils import secure_filename
-import sqlite3
-from functools import wraps
-from multiprocessing import Value
-from datetime import datetime
-
-counter = Value('i', 0)
-counter1 = Value('i', 0)
-
-def login_required(f):
-    """
-    Decorate routes to require login.
-
-    http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
-    """
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if session.get("user_id") is None:
-            return redirect("/login")
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+from flask import Flask, redirect, render_template, request, session, url_for, jsonify
+from helpers import login_required, allowed_file, insert, query_db, close_connection
 
 
 
+COUNTER = Value('i', 0)
+COUNTER1 = Value('i', 0)
 
 # Configure files directory and allowed extensions
 UPLOAD_FOLDER = 'static/photos'
 UPLOAD_FOLDER_AVATAR = 'static/user-avatar'
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 CATEGORIES = ["cars", "tech", "motors", "furniture", "entertainment", "clothing", "other"]
 
 
 # Configure application
-app = Flask(__name__)
+app = Flask(__name__) # pylint: disable=invalid-name
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['UPLOAD_FOLDER_avatar'] = UPLOAD_FOLDER_AVATAR
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
@@ -53,6 +35,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 # Ensure responses aren't cached
 @app.after_request
 def after_request(response):
+    """Disable caches"""
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
@@ -64,52 +47,20 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Connecting the sqlite3 database
-DATABASE = 'buyit.db'
 
-
-def get_db():
-    """Connects the database"""
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-    return db
-
-def insert(table, fields=(), values=()):
-    """Inserts values into database"""
-    cur = get_db()
-    query = 'INSERT INTO %s (%s) VALUES (%s)' % (
-        table,
-        ', '.join(fields),
-        ', '.join(['?'] * len(values))
-    )
-    cur.execute(query, values)
-    cur.commit()
-    # id = cur.lastrowid
-    cur.close()
-    return True
-    # return id
 
 @app.teardown_appcontext
-def close_connection(exception):
-    """Disconnects the database"""
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
-
-def query_db(query, args=(), one=False):
-    """Selects rows from the database"""
-    cur = get_db().execute(query, args)
-    rv = cur.fetchall()
-    cur.close()
-    return (rv[0] if rv else None) if one else rv
+def teardown_appcontext(exception):
+    """close sqlite connection when a teardown happens"""
+    close_connection()
+    return exception
 
 
 @app.route("/")
 def index():
     """Show a list of items to buy"""
     items = query_db("SELECT * FROM items")
-    return render_template("index.html", items = items, categories = CATEGORIES)
+    return render_template("index.html", items=items, categories=CATEGORIES)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -122,59 +73,61 @@ def login():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
+        password = request.form.get("username")
+
         # Ensure username was submitted
-        if not request.form.get("username"):
-            return render_template("mes.html", error = "must provide username")
+        if not password:
+            return render_template("mes.html", error="must provide username")
 
         # Ensure password was submitted
-        elif not request.form.get("password"):
-            return render_template("mes.html", error = "must provide password")
+        if not request.form.get("password"):
+            return render_template("mes.html", error="must provide password")
 
         # Query database for username
-        rows = query_db("SELECT * FROM users WHERE user_name='%s';" % request.form.get("username"))
+        rows = query_db("SELECT * FROM users WHERE user_name='%s';" % password)[0]
 
         # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0][2], request.form.get("password")):
-            return render_template("mes.html", error = "password is not currect")
+        if not check_password_hash(rows['hash'], request.form.get("password")):
+            return render_template("mes.html", error="password is not currect")
 
         # Remember which user has logged in
-        session["user_id"] = rows[0][0]
-        print(rows)
-        session["user_avatar"] =  rows[0][8]
-        session["user_name"] =  request.form.get("username")
-        print (session["user_avatar"])
+        session["user_id"] = rows['id']
+        session["user_avatar"] = rows['avatars_dir']
+        session["user_name"] = password
         # Redirect user to home page
         return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return render_template("login.html")
+    return render_template("login.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
     if request.method == "POST":
-        
 
         avatar = request.files['avatar'] if request.files['avatar'] else "default.png"
         file_name = ""
 
-        file_name = "%d.%s" %(counter1.value, avatar.filename.rsplit('.', 1)[1].lower())
-        with counter1.get_lock():
-            counter1.value += 1
+        file_name = "%d.%s" %(COUNTER1.value, avatar.filename.rsplit('.', 1)[1].lower())
+        with COUNTER1.get_lock():
+            COUNTER1.value += 1
             avatar.save(os.path.join("static/user-avatar", file_name))
 
-        insert("users", ("user_name", "hash", "name", "last_name", "email", "country", "city", "avatars_dir"),
-        (request.form.get("username"), generate_password_hash(request.form.get("password"),
-        method='pbkdf2:sha256', salt_length=8), request.form.get("firstname"), request.form.get("surname"),
-        request.form.get("email"), request.form.get("country"), request.form.get("city"), file_name))
+        insert("users", ("user_name", "hash", "name", "last_name", \
+        "email", "country", "city", "avatars_dir"), (
+            request.form.get("username"), \
+            generate_password_hash(request.form.get("password"), \
+            method='pbkdf2:sha256', salt_length=8), \
+            request.form.get("firstname"), \
+            request.form.get("surname"), \
+            request.form.get("email"), \
+            request.form.get("country"), \
+            request.form.get("city"), file_name))
 
         # redirect user to home page
         return redirect(url_for("index"))
-
-    else:
-        return render_template("register.html")
+    return render_template("register.html")
 
 
 @app.route("/logout")
@@ -197,32 +150,35 @@ def sell():
         file_name = ""
 
         if photo and allowed_file(photo.filename):
-            file_name = "%d.%s" %(counter.value, photo.filename.rsplit('.', 1)[1].lower())
-            with counter.get_lock():
-                counter.value += 1
+            file_name = "%d.%s" %(COUNTER.value, photo.filename.rsplit('.', 1)[1].lower())
+            with COUNTER.get_lock():
+                COUNTER.value += 1
                 photo.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
-                insert("items", ("user_id", "price", "name", "description", "photos_dir", "time", "lat", "lng", "category"), (session["user_id"], request.form.get("price"), request.form.get("title"), request.form.get("description"), file_name, str(datetime.now()), 0, 0, request.form.get("category")))
+                insert("items", (
+                    "user_id", "price", "name", "description", \
+                    "photos_dir", "time", "lat", "lng", "category"), (
+                        session["user_id"], request.form.get("price"), \
+                        request.form.get("title"), request.form.get("description"), \
+                        file_name, str(datetime.now()), 0, 0, \
+                        request.form.get("category")))
 
         return redirect(url_for("index"))
-    
-    else:
-        return render_template("sell.html", categories = CATEGORIES)
+    return render_template("sell.html", categories=CATEGORIES)
 
 
 
-@app.route("/items/<int:item_id>", methods=["GET", "POST"])
-def item(item_id):
+@app.route("/items/<int:item_id>", methods=["GET"])
+def item_page(item_id):
     """See information about the current item"""
-    if request.method == "GET":
-        item = query_db("SELECT * FROM items WHERE id=%d" %item_id)
-        return render_template("item.html", item = item[0])
+    item = query_db("SELECT * FROM items WHERE id=%d" %item_id)
+    return render_template("item.html", item=item[0])
 
 
-@app.route("/category/<category>", methods=["GET"])
-def category(category):
+@app.route("/category/<cat>", methods=["GET"])
+def category(cat):
     """get all the items that are from a specific category"""
-    items = query_db("SELECT * FROM items WHERE category='%s'"%category)
-    return render_template("index.html", items = items, categories = CATEGORIES)
+    items = query_db("SELECT * FROM items WHERE category='%s'"%cat)
+    return render_template("index.html", items=items, categories=CATEGORIES)
 
 
 
@@ -234,13 +190,12 @@ def search():
 
     if not json:
         if not searchword:
-            return render_template("mes.html", error = "must provide a search query")
+            return render_template("mes.html", error="must provide a search query")
         items = query_db("SELECT * FROM items WHERE name LIKE '%{}%'".format(searchword))
-        return render_template("index.html", items = items, categories = CATEGORIES)
-    else:
-        if not searchword:
-            return 0
-        items = query_db("SELECT name FROM items WHERE name LIKE '%{}%'".format(searchword))
-        response = jsonify(items)
-        response.status_code = 200
-        return response
+        return render_template("index.html", items=items, categories=CATEGORIES)
+    if not searchword:
+        return 0
+    items = query_db("SELECT name FROM items WHERE name LIKE '%{}%'".format(searchword))
+    response = jsonify(items)
+    response.status_code = 200
+    return response
