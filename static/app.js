@@ -38,9 +38,8 @@ input.addEventListener("input", function(e) {
             xhttp.send();
     
             xhttp.onreadystatechange = function() {
-                console.log(JSON.parse(xhttp.responseText));
                 if (this.readyState == 4 && this.status == 200) {
-                    awesomplete.list = JSON.parse(xhttp.responseText).map(val => ({value: val, label: val}));
+                    awesomplete.list = JSON.parse(xhttp.responseText).map(val => ({value: val.name, label: val.name}));
                 }
             }
         }
