@@ -32,6 +32,28 @@ def insert(table, fields=(), values=()):
     # return id
 
 
+def update(table, condition, fields=(), values=()):
+    """Update values in the database"""
+    cur = get_db()
+    concatenated_values = ""
+    for i, (field, value) in enumerate(zip(fields, values)):
+        if i == 0:
+            concatenated_values += "%s = '%s'" %(field, value)
+        else:
+            concatenated_values += ", %s = '%s'" %(field, value)
+
+    query = 'UPDATE %s SET %s WHERE %s' % (
+        table,
+        concatenated_values,
+        condition
+    )
+    print(query)
+    cur.execute(query)
+    cur.commit()
+    cur.close()
+    return True
+
+
 def close_connection():
     """Disconnects the database"""
     data_base = getattr(g, '_database', None)
