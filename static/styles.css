@@ -93,7 +93,7 @@ nav input[type=text] {
 .container-fluid {
     margin: 0 auto;
     min-height: calc(100% - 50px);
-    padding: 50px 0 ;
+    padding: 30px 0 ;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
@@ -264,6 +264,34 @@ nav li a {
     width: 194px;
     height: 194px;
     border-radius: 10px;
+}
+
+/* ====================================================== About page ====================================================== */
+
+.about h2 {
+    margin-bottom: 25px;
+}
+
+.about-buyit, .about-me {
+    margin: 20px;
+}
+
+.about-me p, .about-buyit p {
+    margin: 0 0 0 20px;
+    padding: 0;
+}
+
+.social {
+    list-style: none;
+    text-align: center;
+    margin-top: 25px;
+    width: 100%;
+}
+
+.social li {
+    display: inline;
+    margin: 15px;
+    font-size: 46px;
 }
 
 /* ====================================================== footer ====================================================== */

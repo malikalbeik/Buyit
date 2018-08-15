@@ -208,11 +208,15 @@ def profile():
     if request.method == "GET":
         user = query_db("SELECT * FROM users WHERE id={}".format(session["user_id"]))[0]
         return render_template("profile.html", user=user)
-    
-    update('users', 'id = {}'.format(session["user_id"]) ,(
+    update('users', 'id = {}'.format(session["user_id"]), (
         'name', 'last_name', 'email'), ( \
             request.form.get("firstname"), \
             request.form.get("lastname"), \
             request.form.get("email")))
     return render_template("mes.html", error="the database was changed")
 
+
+@app.route("/about", methods=["GET"])
+def about():
+    """Shows information about the app and explains its purpose"""
+    return render_template("about.html")
