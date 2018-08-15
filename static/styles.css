@@ -8,6 +8,8 @@ html, body {
     width: 100%;
     margin: 0;
     background-color: #f4f3f0;
+    height: 100%;
+    overflow: auto;
 }
 
 body {
@@ -87,6 +89,17 @@ nav .search-container button {
 nav input[type=text] {
     border: 1px solid #ccc;  
 }
+
+.container-fluid {
+    margin: 0 auto;
+    min-height: calc(100% - 50px);
+    padding: 50px 0 ;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    overflow: visible;
+}
+
 ul {
     list-style-type: none;
     margin: 0;
@@ -168,8 +181,7 @@ nav li a {
 }
 
 .container {
-    min-height: calc(100% - 130px);
-    margin-bottom: -50px;
+    min-height: 100%;
     padding: 0;
 }
 
@@ -264,7 +276,6 @@ footer {
     text-align: center;
     padding: 17.5px;
     text-transform: uppercase;
-    margin-top: 50px;
     bottom: 0;
 }
 

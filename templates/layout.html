@@ -22,61 +22,60 @@
     </head>
 
     <body>
-        <div id="main">
-            <div id="overlay"></div>
-            <header>
-                <nav>
-                    <h1 class="logo" ><a href="/">Buyit</a></h1>
-                    <div class="search-container">
-                        <form action="/search">
-                            <input type="text" placeholder="Search.." name="search" id="searchInput">
-                            <button type="submit"><i class="fa fa-search"></i></button>
-                        </form>
-                    </div>
-                    {% if session.user_id %}
-                        <ul>
-                            <li class="avatar">
-                                <a onclick="openNav()">
-                                    <img src="{{ url_for('static', filename='user-avatar/') }}{{ session.user_avatar }}" alt="users avatar">
-                                </a>
-                            </li>
-                            <li class="sell_button"><a class="sell_link" href="/sell">Sell Your Stuff</a></li>
-                        </ul>
-                    {% else %}
-                        <ul>
-                            <li class="login_button"><a href="/login">Login</a></li>
-                            <li class="Register_button"><a href="/register">Register</a></li>
-                        </ul>
-                    {% endif %}
-                </nav>
-            </header>
+        <header>
+            <nav>
+                <h1 class="logo" ><a href="/">Buyit</a></h1>
+                <div class="search-container">
+                    <form action="/search">
+                        <input type="text" placeholder="Search.." name="search" id="searchInput">
+                        <button type="submit"><i class="fa fa-search"></i></button>
+                    </form>
+                </div>
+                {% if session.user_id %}
+                    <ul>
+                        <li class="avatar">
+                            <a onclick="openNav()">
+                                <img src="{{ url_for('static', filename='user-avatar/') }}{{ session.user_avatar }}" alt="users avatar">
+                            </a>
+                        </li>
+                        <li class="sell_button"><a class="sell_link" href="/sell">Sell Your Stuff</a></li>
+                    </ul>
+                {% else %}
+                    <ul>
+                        <li class="login_button"><a href="/login">Login</a></li>
+                        <li class="Register_button"><a href="/register">Register</a></li>
+                    </ul>
+                {% endif %}
+            </nav>
+        </header>
+
+        <div class="container-fluid wrapper">
 
             <div class="container">
                 {% block main %}{% endblock %}
             </div>
-            
-            <footer>
-                <p>All rights reserved. <a href="https://malikalbeik.com/">MALIK ALBEIK</a></p>
-            </footer>
 
-        </div>
-
-        {% if session.user_id %}
-        <div class="sideMenu">
-            <div>
-                <img src="{{ url_for('static', filename='user-avatar/') }}{{ session.user_avatar }}" alt="users avatar">
-                <h1>{{ session.user_name }}</h1>
+            {% if session.user_id %}
+            <div class="sideMenu">
+                <div>
+                    <img src="{{ url_for('static', filename='user-avatar/') }}{{ session.user_avatar }}" alt="users avatar">
+                    <h1>{{ session.user_name }}</h1>
+                </div>
+                <ul>
+                    <li><a href="/profile"><img src="{{ url_for('static', filename='website_photos/Avatar.png') }}" alt="user avatar"> Profile</a></li>
+                    <li><a href="/settings"><img src="{{ url_for('static', filename='website_photos/settings.png') }}" alt="settings photo"> Settings</a></li>
+                    <li><a href="/logout"><img src="{{ url_for('static', filename='website_photos/logout.png') }}" alt="logout photo"> Logout</a></li>
+                    <hr>
+                    <li><a href="/about"><img src="{{ url_for('static', filename='website_photos/about.png') }}" alt="about Buyit photo"> About Buyit</a></li>
+                </ul>
             </div>
-            <ul>
-                <li><a href="/profile"><img src="{{ url_for('static', filename='website_photos/Avatar.png') }}" alt="user avatar"> Profile</a></li>
-                <li><a href="/settings"><img src="{{ url_for('static', filename='website_photos/settings.png') }}" alt="settings photo"> Settings</a></li>
-                <li><a href="/logout"><img src="{{ url_for('static', filename='website_photos/logout.png') }}" alt="logout photo"> Logout</a></li>
-                <hr>
-                <li><a href="/about"><img src="{{ url_for('static', filename='website_photos/about.png') }}" alt="about Buyit photo"> About Buyit</a></li>
-            </ul>
+            {% endif %}
         </div>
-        {% endif %}
 
+        <footer class="page-footer">
+            <p>All rights reserved. <a href="https://malikalbeik.com/">MALIK ALBEIK</a></p>
+        </footer>
+        
         <script src="{{ url_for('static', filename='app.js') }}" async></script>
     </body>
 
