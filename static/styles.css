@@ -240,7 +240,7 @@ nav li a {
 }
 
 
-.items {
+.elements {
     overflow: hidden;
     margin: 0;
     padding: 10px;
@@ -250,7 +250,7 @@ nav li a {
 	justify-content: center;
 }
 
-.items > li {
+.elements > li {
     width: 200px;
     padding: 3px;
     background-color: white;
@@ -260,7 +260,7 @@ nav li a {
     margin: 10px;
 
 }
-.items > li  img {
+.elements > li  img {
     width: 194px;
     height: 194px;
     border-radius: 10px;

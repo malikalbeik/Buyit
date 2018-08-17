@@ -59,8 +59,8 @@ def teardown_appcontext(exception):
 @app.route("/")
 def index():
     """Show a list of items to buy"""
-    items = query_db("SELECT * FROM items")
-    return render_template("index.html", items=items, categories=CATEGORIES)
+    items = query_db("SELECT * FROM items LIMIT 8 ")
+    return render_template("index.html", categories=CATEGORIES, items_class="items", items=items)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -177,8 +177,8 @@ def item_page(item_id):
 @app.route("/category/<cat>", methods=["GET"])
 def category(cat):
     """get all the items that are from a specific category"""
-    items = query_db("SELECT * FROM items WHERE category='%s'"%cat)
-    return render_template("index.html", items=items, categories=CATEGORIES)
+    items = query_db("SELECT * FROM items WHERE category='{}' LIMIT 8 ".format(cat))
+    return render_template("index.html", items_class=cat, categories=CATEGORIES, items=items)
 
 
 
@@ -220,3 +220,25 @@ def profile():
 def about():
     """Shows information about the app and explains its purpose"""
     return render_template("about.html")
+
+
+@app.route("/getelements", methods=["GET"])
+def getelements():
+    """gets a number of elements from the database and returns them as a json response"""
+    offset = request.args.get('offset', '')
+    limit = request.args.get('limit', '')
+    categ = request.args.get('category', '')
+
+    if not limit or not offset:
+        return render_template(
+            "mes.html",
+            error="please provide a limit and an offset for your request to be made."
+            )
+    if not categ:
+        items = query_db("SELECT * FROM items LIMIT {} OFFSET {}".format(limit, offset))
+    else:
+        items = query_db(
+            "SELECT * FROM items WHERE category = '{}' LIMIT {}, {} ".format(categ, offset, limit))
+    response = jsonify(items)
+    response.status_code = 200
+    return response

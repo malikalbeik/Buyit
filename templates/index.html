@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block main %}
-
+    <div class="index">
         <ul class="categories">
             {% for category in categories %}
             <li>
@@ -17,7 +17,7 @@
             {% endfor %}
         </ul>
 
-        <ul class="items">
+        <ul class="{{ items_class }} elements">
             {% for item in items %}
                 <li>
                     <a href="items/{{ item['id'] }}">
@@ -25,8 +25,13 @@
                         <h3>{{ item['name'] }}</h3>
                     </a>
                 </li>
-
             {% endfor %}
         </ul>
+
+        <div class="load-more">
+            <button onclick="loadMoreItems()">Load more</button>
+            <p style="display:none;">sorry but there is no more items</p>
+        </div>
+    </div>
 
 {% endblock %}
