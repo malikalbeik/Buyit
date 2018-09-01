@@ -266,6 +266,50 @@ nav li a {
     border-radius: 10px;
 }
 
+.load-more {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.load-more button {
+    border-radius: 15px;
+    width: 150px;
+    background-color: #444;
+    color: #f6f3e6;
+    border: none;
+    font-size: 18px;
+    margin: 0;
+    padding: 0;
+}
+.load-more p {
+    padding: 0;
+    margin: 0;
+}
+
+.flash {
+    position: fixed;
+    top: 100px;
+    left: 0;
+    z-index: 100;
+    width: 100%;
+    height: 30px;
+    background-color: red;
+    text-align: center;
+
+    animation:signup-response 0.5s 1;
+    -webkit-animation:signup-response 0.5s 1;
+    animation-fill-mode: forwards;
+
+    animation-delay:2s;
+    -webkit-animation-delay:1s; /* Safari and Chrome */
+    -webkit-animation-fill-mode: forwards;
+}
+
+@keyframes signup-response{
+    from {opacity :1;}
+    to {opacity :0;}
+}
+
 /* ====================================================== About page ====================================================== */
 
 .about h2 {
