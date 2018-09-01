@@ -58,7 +58,7 @@ function openNav() {
     document.querySelector("body").style.overflow = "hidden";
     
     
-    body.addEventListener("click", (event) => {
+    document.querySelector("body").addEventListener("click", (event) => {
         if (event.target != document.querySelector(".sideMenu") && event.target != document.querySelector(".avatar img")) {
             closeNav();
         }
