@@ -11,11 +11,11 @@
         </div>
         <div class="item-description-container">
             <h3>{{ item['name'] }}</h3>
-            <p>Category: {{ item['category'] }}</p>
-            <p>{{ item['description'] }}</p>
-            <p>{{ item['time'] }}</p>
-            
-            
+            <p>${{ item['price'] }}</p>
+            <p>Category: <br>{{ item['category'] }}</p>
+            <p>Description: <br>{{ item['description'] }}</p>
+            <p>Posted: <br>{{ item['time']|strftime }}</p>
+            <a class="buy-button" href="{{ url_for('buy', id= item['id'])}}">Buy</a>
         </div>
     </div>
 {% endblock %}

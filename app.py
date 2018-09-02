@@ -10,6 +10,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, redirect, flash, render_template, request, session, url_for, jsonify
 from helpers import login_required, allowed_file, insert, query_db, close_connection, update
+from dateutil import parser
 
 
 
@@ -156,11 +157,10 @@ def sell():
                 photo.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
                 insert("items", (
                     "user_id", "price", "name", "description", \
-                    "photos_dir", "time", "lat", "lng", "category"), (
+                    "photos_dir", "time", "category"), (
                         session["user_id"], request.form.get("price"), \
                         request.form.get("title"), request.form.get("description"), \
-                        file_name, str(datetime.now()), 0, 0, \
-                        request.form.get("category")))
+                        file_name, str(datetime.now()), request.form.get("category")))
 
         return redirect(url_for("index"))
     return render_template("sell.html", categories=CATEGORIES)
@@ -171,6 +171,10 @@ def sell():
 def item_page(item_id):
     """See information about the current item"""
     item = query_db("SELECT * FROM items WHERE id=%d" %item_id)
+    if not item:
+        return render_template("mes.html", error="there is no such item")
+    elif item[0]["sold"] == 1:
+        return render_template("mes.html", error="the item that you are looking for is already sold")
     return render_template("item.html", item=item[0])
 
 
@@ -243,3 +247,25 @@ def getelements():
     response = jsonify(items)
     response.status_code = 200
     return response
+
+@app.route("/buy/<int:id>", methods=["GET"])
+@login_required
+def buy(id):
+    """lets the user buys a specific item"""
+    item = query_db("SELECT * FROM items WHERE id=%d" %id)
+    if not item:
+        return render_template("mes.html", error="there is no such item")
+    elif item[0]["sold"] == 1:
+        return render_template("mes.html", error="the item that you are trying to buy is already sold")
+    update('items', 'id = {}'.format(id), ('sold', 'buying_user'), (1, session["user_id"]))
+    return render_template("mes.html", error="items bought successfully")
+
+
+@app.template_filter('strftime')
+def _jinja2_filter_datetime(date, fmt=None):
+    date = parser.parse(date)
+    native = date.replace(tzinfo=None)
+    format='%b %d, %Y'
+    if native.strftime(format) == str(datetime.now().strftime('%b %d, %Y')):
+        return "Today"
+    return native.strftime(format) 
