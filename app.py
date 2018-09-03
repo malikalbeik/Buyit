@@ -7,15 +7,13 @@ from datetime import datetime
 from multiprocessing import Value
 from tempfile import mkdtemp
 from flask_session import Session
+import uuid
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import Flask, redirect, flash, render_template, request, session, url_for, jsonify
+from flask import Flask, redirect, flash, render_template, request, session, url_for, jsonify, abort
 from helpers import login_required, allowed_file, insert, query_db, close_connection, update
 from dateutil import parser
 
 
-
-COUNTER = Value('i', 0)
-COUNTER1 = Value('i', 0)
 
 # Configure files directory and allowed extensions
 UPLOAD_FOLDER = 'static/photos'
@@ -110,10 +108,8 @@ def register():
         avatar = request.files['avatar'] if request.files['avatar'] else "default.png"
         file_name = ""
 
-        file_name = "%d.%s" %(COUNTER1.value, avatar.filename.rsplit('.', 1)[1].lower())
-        with COUNTER1.get_lock():
-            COUNTER1.value += 1
-            avatar.save(os.path.join("static/user-avatar", file_name))
+        file_name = "%d.%s" %(uuid.uuid4(), avatar.filename.rsplit('.', 1)[1].lower())
+        avatar.save(os.path.join("static/user-avatar", file_name))
 
         insert("users", ("user_name", "hash", "name", "last_name", \
         "email", "country", "city", "avatars_dir"), (
@@ -151,16 +147,14 @@ def sell():
         file_name = ""
 
         if photo and allowed_file(photo.filename):
-            file_name = "%d.%s" %(COUNTER.value, photo.filename.rsplit('.', 1)[1].lower())
-            with COUNTER.get_lock():
-                COUNTER.value += 1
-                photo.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
-                insert("items", (
-                    "user_id", "price", "name", "description", \
-                    "photos_dir", "time", "category"), (
-                        session["user_id"], request.form.get("price"), \
-                        request.form.get("title"), request.form.get("description"), \
-                        file_name, str(datetime.now()), request.form.get("category")))
+            file_name = "%d.%s" %(uuid.uuid4(), photo.filename.rsplit('.', 1)[1].lower())
+            photo.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
+            insert("items", (
+                "user_id", "price", "name", "description", \
+                "photos_dir", "time", "category"), (
+                    session["user_id"], request.form.get("price"), \
+                    request.form.get("title"), request.form.get("description"), \
+                    file_name, str(datetime.now()), request.form.get("category")))
 
         return redirect(url_for("index"))
     return render_template("sell.html", categories=CATEGORIES)
@@ -268,6 +262,38 @@ def currentsellings():
     """shows a list of the ites that the user is currently selling"""
     items = query_db("SELECT * FROM items WHERE user_id=%d and sold=0" %session["user_id"])
     return render_template("currentsellings.html", items=items)
+
+
+@app.route("/item/edit/<int:id>", methods=["GET", "POST"])
+@login_required
+def edit(id):
+    """lets the user edit his currently selling items"""
+    item = query_db("SELECT * FROM items WHERE id=%d" %id)
+    if not item:
+        return render_template("mes.html", error="page not found")
+    elif item[0]['user_id'] != session['user_id']:
+        return render_template("mes.html", error="you don't own the item that you are trying to edit")
+    if request.method == "GET":
+        return render_template("edit.html", item=item[0],  categories=CATEGORIES)
+    else:
+        if not request.form.get("photo"):
+            update('items', 'id = {}'.format(id), (
+            'name', 'price', 'description', 'category'), ( \
+                request.form.get("name"), \
+                request.form.get("price"), \
+                request.form.get("description"), \
+                request.form.get("category")))
+        else:
+            os.remove(UPLOAD_FOLDER/item["photos_dir"])
+            photo = request.files['photo']
+            file_name = ""
+
+            if photo and allowed_file(photo.filename):
+                file_name = "%d.%s" %(uuid.uuid4(), photo.filename.rsplit('.', 1)[1].lower())
+                photo.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
+
+                update('items', 'id = {}'.format(id), 'photos_dir', file_name)
+        return redirect(url_for("currentsellings"))
 
 
 @app.template_filter('strftime')
