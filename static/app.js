@@ -38,6 +38,10 @@ function loadMoreItems() {
                 li.innerHTML = `<a href="items/${element.id}"><img src="/static/photos/${element.photos_dir}" alt="TO-DO"><h3>${element.name}</h3></a>`
                 ul.appendChild(li);
             })
+            if (res.length != 8) {
+                document.querySelector(".load-more > p").style.display = "block";
+                document.querySelector(".load-more > button").style.display = "none";
+            }
         }
         else {
             document.querySelector(".load-more > p").style.display = "block";
@@ -97,10 +101,10 @@ var awesompleteComplete = debounce(function(value) {
 /**
  * Credit: David Walsh (https://davidwalsh.name/javascript-debounce-function)
  * 
- * [Returns a function, that, as long as it continues to be invoked, will not
+ * Returns a function, that, as long as it continues to be invoked, will not
  * be triggered. The function will be called after it stops being called for
  * N milliseconds. If `immediate` is passed, trigger the function on the
- * leading edge, instead of the trailing.]
+ * leading edge, instead of the trailing.
  * 
  * @param {function} func - The function to be excuted.
  * @param {number} wait - The time in milliseconds.

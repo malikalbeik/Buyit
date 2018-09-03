@@ -60,7 +60,7 @@ def teardown_appcontext(exception):
 @app.route("/")
 def index():
     """Show a list of items to buy"""
-    items = query_db("SELECT * FROM items LIMIT 8 ")
+    items = query_db("SELECT * FROM items WHERE sold=0 LIMIT 8 ")
     return render_template("index.html", categories=CATEGORIES, items_class="items", items=items)
 
 
@@ -181,7 +181,7 @@ def item_page(item_id):
 @app.route("/category/<cat>", methods=["GET"])
 def category(cat):
     """get all the items that are from a specific category"""
-    items = query_db("SELECT * FROM items WHERE category='{}' LIMIT 8 ".format(cat))
+    items = query_db("SELECT * FROM items WHERE category='{}' and sold=0 LIMIT 8 ".format(cat))
     return render_template("index.html", items_class=cat, categories=CATEGORIES, items=items)
 
 
@@ -195,11 +195,11 @@ def search():
     if not json:
         if not searchword:
             return render_template("mes.html", error="must provide a search query")
-        items = query_db("SELECT * FROM items WHERE name LIKE '%{}%'".format(searchword))
+        items = query_db("SELECT * FROM items WHERE name LIKE '%{}%' and sold=0".format(searchword))
         return render_template("index.html", items=items, categories=CATEGORIES)
     if not searchword:
         return 0
-    items = query_db("SELECT name FROM items WHERE name LIKE '%{}%'".format(searchword))
+    items = query_db("SELECT name FROM items WHERE name LIKE '%{}%' and sold=0".format(searchword))
     response = jsonify(items)
     response.status_code = 200
     return response
@@ -240,13 +240,14 @@ def getelements():
             error="please provide a limit and an offset for your request to be made."
             )
     if not categ:
-        items = query_db("SELECT * FROM items LIMIT {} OFFSET {}".format(limit, offset))
+        items = query_db("SELECT * FROM items WHERE sold=0 LIMIT {} OFFSET {}".format(limit, offset))
     else:
         items = query_db(
-            "SELECT * FROM items WHERE category = '{}' LIMIT {}, {} ".format(categ, offset, limit))
+            "SELECT * FROM items WHERE category = '{}' and sold=0 LIMIT {}, {} ".format(categ, offset, limit))
     response = jsonify(items)
     response.status_code = 200
     return response
+
 
 @app.route("/buy/<int:id>", methods=["GET"])
 @login_required
@@ -259,6 +260,14 @@ def buy(id):
         return render_template("mes.html", error="the item that you are trying to buy is already sold")
     update('items', 'id = {}'.format(id), ('sold', 'buying_user'), (1, session["user_id"]))
     return render_template("mes.html", error="items bought successfully")
+
+
+@app.route("/currentsellings", methods=["GET"])
+@login_required
+def currentsellings():
+    """shows a list of the ites that the user is currently selling"""
+    items = query_db("SELECT * FROM items WHERE user_id=%d and sold=0" %session["user_id"])
+    return render_template("currentsellings.html", items=items)
 
 
 @app.template_filter('strftime')

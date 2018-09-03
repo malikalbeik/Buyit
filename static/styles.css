@@ -213,6 +213,8 @@ nav li a {
 .item-container img {
     width: 500px;
     height: 500px;
+    margin-right: 50px;
+    border-radius: 25px;
 }
 
 .buy-button {
@@ -274,6 +276,11 @@ nav li a {
     width: 194px;
     height: 194px;
     border-radius: 10px;
+}
+
+.index > p {
+    text-align: center;
+    margin: 50px;
 }
 
 .load-more {

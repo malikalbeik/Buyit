@@ -17,21 +17,28 @@
             {% endfor %}
         </ul>
 
-        <ul class="{{ items_class }} elements">
-            {% for item in items %}
-                <li>
-                    <a href="items/{{ item['id'] }}">
-                        <img src="{{ url_for('static', filename='photos/') }}{{ item['photos_dir'] }}" alt="TO-DO">
-                        <h3>{{ item['name'] }}</h3>
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
+        {% if items %}
+            <ul class="{{ items_class }} elements">
+                {% for item in items %}
+                    <li>
+                        <a href="items/{{ item['id'] }}">
+                            <img src="{{ url_for('static', filename='photos/') }}{{ item['photos_dir'] }}" alt="TO-DO">
+                            <h3>{{ item['name'] }}</h3>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
 
-        <div class="load-more">
-            <button onclick="loadMoreItems()">Load more</button>
-            <p style="display:none;">sorry but there is no more items</p>
-        </div>
+            {% if items.length == 8 %}
+            <div class="load-more">
+                <button onclick="loadMoreItems()">Load more</button>
+                <p style="display:none;">sorry but there is no more items</p>
+            </div>
+            {% endif %}
+        {% else %}
+            <p>the site doesn't contain any items at this time.</p>
+        {% endif %}
+
     </div>
 
 {% endblock %}
