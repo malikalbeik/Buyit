@@ -21,7 +21,7 @@
             <ul class="{{ items_class }} elements">
                 {% for item in items %}
                     <li>
-                        <a href="items/{{ item['id'] }}">
+                        <a href="{{ url_for('item', id = item['id']) }}">
                             <img src="{{ url_for('static', filename='photos/') }}{{ item['photos_dir'] }}" alt="TO-DO">
                             <h3>{{ item['name'] }}</h3>
                         </a>
