@@ -10,7 +10,7 @@ from flask_session import Session
 import uuid
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, redirect, flash, render_template, request, session, url_for, jsonify, abort
-from helpers import login_required, allowed_file, insert, query_db, close_connection, update
+from helpers import login_required, allowed_file, insert, query_db, close_connection, update, db_delete
 from dateutil import parser
 
 
@@ -161,10 +161,10 @@ def sell():
 
 
 
-@app.route("/items/<int:item_id>", methods=["GET"])
-def item_page(item_id):
+@app.route("/items/<int:id>", methods=["GET"])
+def item(id):
     """See information about the current item"""
-    item = query_db("SELECT * FROM items WHERE id=%d" %item_id)
+    item = query_db("SELECT * FROM items WHERE id=%d" %id)
     if not item:
         return render_template("mes.html", error="there is no such item")
     elif item[0]["sold"] == 1:
@@ -294,6 +294,19 @@ def edit(id):
 
                 update('items', 'id = {}'.format(id), 'photos_dir', file_name)
         return redirect(url_for("currentsellings"))
+
+
+@app.route("/delete/<int:id>", methods=["GET"])
+@login_required
+def delete(id):
+    """delete an item from the database"""
+    item = query_db("SELECT * FROM items WHERE id=%d" %id)
+    print(item)
+    if item and item[0]['user_id'] == session['user_id']:
+        db_delete("items", "id=%d" %id)
+        flash('You have successfully deleted the item')
+        return redirect(url_for("currentsellings"))
+    return render_template("mes.html", error="there has been an error deleting this item please try again later")
 
 
 @app.template_filter('strftime')

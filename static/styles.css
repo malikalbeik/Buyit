@@ -217,7 +217,7 @@ nav li a {
     border-radius: 25px;
 }
 
-.buy-button {
+.buy-button, .delete-button {
     display: block;
     width: 100px;
     background: #444;

@@ -32,6 +32,19 @@ def insert(table, fields=(), values=()):
     # return id
 
 
+def db_delete(table, condition):
+    """Deletes values in database"""
+    cur = get_db()
+    query = 'DELETE FROM %s WHERE %s' % (
+        table,
+        condition
+    )
+    cur.execute(query)
+    cur.commit()
+    cur.close()
+    return True
+
+
 def update(table, condition, fields=(), values=()):
     """Update values in the database"""
     cur = get_db()
