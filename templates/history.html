@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    BuyIt
+{% endblock %}
+
+{% block main %}
+    <div>
+        <h2>Purchase History:</h2>
+        {% if items %}
+            <ul class="{{ items_class }} elements">
+                {% for item in items %}
+                    <li>
+                        <a href="{{ url_for('purchased_item', id = item['id']) }}">
+                            <img src="{{ url_for('static', filename='photos/') }}{{ item['photos_dir'] }}" alt="{{ item['name'] }}'s photo'">
+                            <h3>{{ item['name'] }}</h3>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>you don't have any purchases.</p>
+        {% endif %}
+    </div>
+
+{% endblock %}

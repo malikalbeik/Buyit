@@ -252,6 +252,8 @@ def buy(id):
         return render_template("mes.html", error="there is no such item")
     elif item[0]["sold"] == 1:
         return render_template("mes.html", error="the item that you are trying to buy is already sold")
+    elif item[0]['user_id'] == session['user_id']:
+        return render_template("mes.html", error="you can't buy your own item.")
     update('items', 'id = {}'.format(id), ('sold', 'buying_user'), (1, session["user_id"]))
     return render_template("mes.html", error="items bought successfully")
 
@@ -307,6 +309,28 @@ def delete(id):
         flash('You have successfully deleted the item')
         return redirect(url_for("currentsellings"))
     return render_template("mes.html", error="there has been an error deleting this item please try again later")
+
+
+@app.route("/history", methods=["GET"])
+@login_required
+def history():
+    """shows a list of the users purchases"""
+    items = query_db("SELECT * FROM items WHERE buying_user=%d" %session['user_id'])
+    return render_template("history.html", items=items)
+
+
+@app.route("/history/items/<int:id>", methods=["GET"])
+@login_required
+def purchased_item(id):
+    """shows information about the pruchased items"""
+    item = query_db("SELECT * FROM items WHERE id=%d" %id)
+    print(item)
+    if item and item[0] and item[0]['buying_user'] == session['user_id']:
+        return render_template("purchased_item.html", item=item[0])
+    elif item[0]['buying_user'] != session['user_id']:
+        return render_template("mes.html", error="you don't have permession to access this page")
+    return render_template("mes.html", error="an error accord please try again later")
+
 
 
 @app.template_filter('strftime')
