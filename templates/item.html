@@ -14,6 +14,7 @@
             <p>${{ item['price'] }}</p>
             <p>Category: <br>{{ item['category'] }}</p>
             <p>Description: <br>{{ item['description'] }}</p>
+            <p>Location: <br>{{ item['city'] }}, {{ item['state']}}, {{ item['country'] }}</p>
             <p>Posted: <br>{{ item['time']|strftime }}</p>
             <a class="buy-button" href="{{ url_for('buy', id= item['id'])}}">Buy</a>
         </div>

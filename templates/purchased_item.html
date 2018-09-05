@@ -14,6 +14,7 @@
             <p>price bought: ${{ item['price'] }}</p>
             <p>Category: <br>{{ item['category'] }}</p>
             <p>Description: <br>{{ item['description'] }}</p>
+            <p>Location: <br>{{ item['city'] }}, {{ item['state']}}, {{ item['country'] }}</p>
             <p>Posted: <br>{{ item['time']|strftime }}</p>
         </div>
     </div>

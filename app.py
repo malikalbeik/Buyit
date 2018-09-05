@@ -112,7 +112,7 @@ def register():
         avatar.save(os.path.join("static/user-avatar", file_name))
 
         insert("users", ("user_name", "hash", "name", "last_name", \
-        "email", "country", "city", "avatars_dir"), (
+        "email", "country", "city", "state", "avatars_dir"), (
             request.form.get("username"), \
             generate_password_hash(request.form.get("password"), \
             method='pbkdf2:sha256', salt_length=8), \
@@ -120,7 +120,9 @@ def register():
             request.form.get("surname"), \
             request.form.get("email"), \
             request.form.get("country"), \
-            request.form.get("city"), file_name))
+            request.form.get("city"),
+            request.form.get("state"),
+            file_name))
 
         # redirect user to home page
         return redirect(url_for("index"))
@@ -145,16 +147,18 @@ def sell():
     if request.method == "POST":
         photo = request.files['photo']
         file_name = ""
+        user = query_db("SELECT * FROM users WHERE id=%d" %session["user_id"])
 
         if photo and allowed_file(photo.filename):
             file_name = "%d.%s" %(uuid.uuid4(), photo.filename.rsplit('.', 1)[1].lower())
             photo.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
             insert("items", (
                 "user_id", "price", "name", "description", \
-                "photos_dir", "time", "category"), (
+                "photos_dir", "time", "category", "country", "state", "city"), (
                     session["user_id"], request.form.get("price"), \
                     request.form.get("title"), request.form.get("description"), \
-                    file_name, str(datetime.now()), request.form.get("category")))
+                    file_name, str(datetime.now()), request.form.get("category"), \
+                    user[0]['country'], user[0]['state'], user[0]['city']))
 
         return redirect(url_for("index"))
     return render_template("sell.html", categories=CATEGORIES)
