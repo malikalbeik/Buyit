@@ -7,7 +7,7 @@
 {% block main %}
     <div class="item-container">
         <div class="item-image-container">
-            <img src="../static/photos/{{ item['photos_dir'] }}" alt="">
+            <img src="{{ url_for('static', filename='photos/') }}{{ item['photos_dir'] }}" alt="{{ item['name'] }}'s photo">
         </div>
         <div class="item-description-container">
             <h3>{{ item['name'] }}</h3>
