@@ -48,7 +48,8 @@ class Notification(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     item_id = db.Column(db.Integer, db.ForeignKey('item.id'), nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    read = db.Column(db.Boolean, default=0)
+
+
 
     def __repr__(self):
         return '<Notification {}>'.format(self.id)  

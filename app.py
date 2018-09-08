@@ -240,6 +240,8 @@ def buy(id):
         return render_template("mes.html", error="the item that you are trying to buy is already sold")
     elif item.user_id == session['user_id']:
         return render_template("mes.html", error="you can't buy your own item.")
+    notification = Notification(user_id=item.user_id, item_id=item.id)
+    db.session.add(notification)
     item.sold = True
     item.buying_user = session["user_id"]
     db.session.commit()
@@ -317,6 +319,12 @@ def purchased_item(id):
         return render_template("mes.html", error="you don't have permession to access this page")
     return render_template("mes.html", error="an error accord please try again later")
 
+
+@app.route("/notifications", methods=["GET"])
+@login_required
+def notifications():
+    notifications = db.session.query(Notification, Item.title).join(Item).filter(Notification.user_id == session['user_id']).all()
+    return render_template("notifications.html", notifications=notifications)
 
 
 @app.template_filter('strftime')

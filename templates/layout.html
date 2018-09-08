@@ -71,11 +71,12 @@
                 </div>
                 <ul>
                     <li><a href="{{ url_for('profile') }}"><img src="{{ url_for('static', filename='website_photos/Avatar.png') }}" alt="user avatar"> Profile</a></li>
-                    <li><a href="{{ url_for('currentsellings') }}"><img src="{{ url_for('static', filename='website_photos/currentsellings.png') }}" alt="current sellings image"> Current Sellings</a></li>
-                    <li><a href="{{ url_for('history') }}"><img src="{{ url_for('static', filename='website_photos/history.png') }}" alt="Purchase history image"> Purchase History</a></li>
-                    <li><a href="{{ url_for('logout') }}"><img src="{{ url_for('static', filename='website_photos/logout.png') }}" alt="logout photo"> Logout</a></li>
+                    <li><a href="{{ url_for('currentsellings') }}"><img src="{{ url_for('static', filename='website_photos/currentsellings.png') }}" alt="current sellings icon"> Current Sellings</a></li>
+                    <li><a href="{{ url_for('history') }}"><img src="{{ url_for('static', filename='website_photos/history.png') }}" alt="Purchase history icon"> Purchase History</a></li>
+                    <li><a href="{{ url_for('notifications') }}"><img src="{{ url_for('static', filename='website_photos/notifications.png') }}" alt="Notifications icon">Notifications</a></li>
+                    <li><a href="{{ url_for('logout') }}"><img src="{{ url_for('static', filename='website_photos/logout.png') }}" alt="logout icon"> Logout</a></li>
                     <hr>
-                    <li><a href="{{ url_for('about') }}"><img src="{{ url_for('static', filename='website_photos/about.png') }}" alt="about Buyit photo"> About Buyit</a></li>
+                    <li><a href="{{ url_for('about') }}"><img src="{{ url_for('static', filename='website_photos/about.png') }}" alt="about Buyit icon"> About Buyit</a></li>
                 </ul>
             </div>
             {% endif %}
