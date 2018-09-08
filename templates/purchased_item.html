@@ -7,15 +7,15 @@
 {% block main %}
     <div class="item-container">
         <div class="item-image-container">
-            <img src="{{ url_for('static', filename='photos/') }}{{ item['photos_dir'] }}" alt="{{ item['name'] }}'s photo">
+            <img src="{{ url_for('static', filename='photos/') }}{{ item['photo'] }}" alt="{{ item['title'] }}'s photo">
         </div>
         <div class="item-description-container">
-            <h3>{{ item['name'] }}</h3>
+            <h3>{{ item['title'] }}</h3>
             <p>price bought: ${{ item['price'] }}</p>
             <p>Category: <br>{{ item['category'] }}</p>
             <p>Description: <br>{{ item['description'] }}</p>
             <p>Location: <br>{{ item['city'] }}, {{ item['state']}}, {{ item['country'] }}</p>
-            <p>Posted: <br>{{ item['time']|strftime }}</p>
+            <p>Posted: <br>{{ item['pub_date']|strftime }}</p>
         </div>
     </div>
 {% endblock %}

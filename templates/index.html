@@ -22,8 +22,8 @@
                 {% for item in items %}
                     <li>
                         <a href="{{ url_for('item', id = item['id']) }}">
-                            <img src="{{ url_for('static', filename='photos/') }}{{ item['photos_dir'] }}" alt="TO-DO">
-                            <h3>{{ item['name'] }}</h3>
+                            <img src="{{ url_for('static', filename='photos/') }}{{ item['photo'] }}" alt="TO-DO">
+                            <h3>{{ item['title'] }}</h3>
                         </a>
                     </li>
                 {% endfor %}

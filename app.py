@@ -5,31 +5,26 @@ Here all the routes of the app are defined and setup.
 import os
 from datetime import datetime
 from multiprocessing import Value
-from tempfile import mkdtemp
 from flask_session import Session
 import uuid
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, redirect, flash, render_template, request, session, url_for, jsonify, abort
-from helpers import login_required, allowed_file, insert, query_db, close_connection, update, db_delete
+from helpers import login_required, allowed_file
 from dateutil import parser
+from config import Config
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 
 
-# Configure files directory and allowed extensions
-UPLOAD_FOLDER = 'static/photos'
-UPLOAD_FOLDER_AVATAR = 'static/user-avatar'
-CATEGORIES = ["cars", "tech", "motors", "furniture", "entertainment", "clothing", "other"]
-
-
-# Configure application
+# Configure application from config.py
 app = Flask(__name__) # pylint: disable=invalid-name
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['UPLOAD_FOLDER_avatar'] = UPLOAD_FOLDER_AVATAR
-app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+app.config.from_object(Config)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+Session(app)
 
-
-# Ensure templates are auto-reloaded
-app.config["TEMPLATES_AUTO_RELOAD"] = True
+from models import User, Item, Notification
 
 # Ensure responses aren't cached
 @app.after_request
@@ -40,26 +35,17 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
-# Configure session to use filesystem (instead of signed cookies)
-app.config["SESSION_FILE_DIR"] = mkdtemp()
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
-
-
 
 @app.teardown_appcontext
-def teardown_appcontext(exception):
-    """close sqlite connection when a teardown happens"""
-    close_connection()
-    return exception
+def shutdown_session(exception=None):
+    db.session.remove()
 
 
 @app.route("/")
 def index():
     """Show a list of items to buy"""
-    items = query_db("SELECT * FROM items WHERE sold=0 LIMIT 8 ")
-    return render_template("index.html", categories=CATEGORIES, items_class="items", items=items)
+    items = Item.query.filter(Item.sold==0).limit(8).all()
+    return render_template("index.html", categories=app.config['CATEGORIES'], items_class="items", items=items)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -72,7 +58,7 @@ def login():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        password = request.form.get("username")
+        password = request.form.get("password")
 
         # Ensure username was submitted
         if not password:
@@ -83,16 +69,16 @@ def login():
             return render_template("mes.html", error="must provide password")
 
         # Query database for username
-        rows = query_db("SELECT * FROM users WHERE user_name='%s';" % password)[0]
+        user = User.query.filter(User.username==request.form.get("username")).first_or_404()
 
         # Ensure username exists and password is correct
-        if not check_password_hash(rows['hash'], request.form.get("password")):
+        if not check_password_hash(user.hash, request.form.get("password")):
             return render_template("mes.html", error="password is not currect")
 
         # Remember which user has logged in
-        session["user_id"] = rows['id']
-        session["user_avatar"] = rows['avatars_dir']
-        session["user_name"] = password
+        session["user_id"] = user.id
+        session["user_avatar"] = user.avatar
+        session["user_name"] = user.username
         # Redirect user to home page
         return redirect("/")
 
@@ -111,18 +97,13 @@ def register():
         file_name = "%d.%s" %(uuid.uuid4(), avatar.filename.rsplit('.', 1)[1].lower())
         avatar.save(os.path.join("static/user-avatar", file_name))
 
-        insert("users", ("user_name", "hash", "name", "last_name", \
-        "email", "country", "city", "state", "avatars_dir"), (
-            request.form.get("username"), \
-            generate_password_hash(request.form.get("password"), \
-            method='pbkdf2:sha256', salt_length=8), \
-            request.form.get("firstname"), \
-            request.form.get("surname"), \
-            request.form.get("email"), \
-            request.form.get("country"), \
-            request.form.get("city"),
-            request.form.get("state"),
-            file_name))
+        user = User(username=request.form.get("username"), \
+            hash=generate_password_hash(request.form.get("password"), method='pbkdf2:sha256', salt_length=8), \
+            email=request.form.get("email"), firstname=request.form.get("firstname"), \
+            lastname=request.form.get("lastname"), country=request.form.get("country"), \
+            state=request.form.get("state"), city=request.form.get("city"), avatar=file_name)
+        db.session.add(user)
+        db.session.commit()
 
         # redirect user to home page
         return redirect(url_for("index"))
@@ -147,40 +128,42 @@ def sell():
     if request.method == "POST":
         photo = request.files['photo']
         file_name = ""
-        user = query_db("SELECT * FROM users WHERE id=%d" %session["user_id"])
+        user = User.query.filter(User.id==session["user_id"]).first_or_404()
 
         if photo and allowed_file(photo.filename):
             file_name = "%d.%s" %(uuid.uuid4(), photo.filename.rsplit('.', 1)[1].lower())
             photo.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
-            insert("items", (
-                "user_id", "price", "name", "description", \
-                "photos_dir", "time", "category", "country", "state", "city"), (
-                    session["user_id"], request.form.get("price"), \
-                    request.form.get("title"), request.form.get("description"), \
-                    file_name, str(datetime.now()), request.form.get("category"), \
-                    user[0]['country'], user[0]['state'], user[0]['city']))
+
+
+            item = Item(user_id=session["user_id"], \
+                price=request.form.get("price"), \
+                title=request.form.get("title"), description=request.form.get("description"), \
+                photo=file_name, category=request.form.get("category"), country=user.country, \
+                state=user.state, city=user.city)
+            db.session.add(item)
+            db.session.commit()
 
         return redirect(url_for("index"))
-    return render_template("sell.html", categories=CATEGORIES)
+    return render_template("sell.html", categories=app.config['CATEGORIES'])
 
 
 
 @app.route("/items/<int:id>", methods=["GET"])
 def item(id):
     """See information about the current item"""
-    item = query_db("SELECT * FROM items WHERE id=%d" %id)
+    item = Item.query.filter(Item.id==id).first_or_404()
     if not item:
         return render_template("mes.html", error="there is no such item")
-    elif item[0]["sold"] == 1:
+    elif item.sold == 1:
         return render_template("mes.html", error="the item that you are looking for is already sold")
-    return render_template("item.html", item=item[0])
+    return render_template("item.html", item=item)
 
 
 @app.route("/category/<cat>", methods=["GET"])
 def category(cat):
     """get all the items that are from a specific category"""
-    items = query_db("SELECT * FROM items WHERE category='{}' and sold=0 LIMIT 8 ".format(cat))
-    return render_template("index.html", items_class=cat, categories=CATEGORIES, items=items)
+    items = Item.query.filter(Item.category==cat and Item.sold==0).limit(8).all()
+    return render_template("index.html", items_class=cat, categories=app.config['CATEGORIES'], items=items)
 
 
 
@@ -193,11 +176,11 @@ def search():
     if not json:
         if not searchword:
             return render_template("mes.html", error="must provide a search query")
-        items = query_db("SELECT * FROM items WHERE name LIKE '%{}%' and sold=0".format(searchword))
-        return render_template("index.html", items=items, categories=CATEGORIES)
+        items = Item.query.filter((Item.title.like("%{}%".format(searchword))) & (Item.sold == False)).all()
+        return render_template("index.html", items=items, categories=app.config['CATEGORIES'])
     if not searchword:
         return 0
-    items = query_db("SELECT name FROM items WHERE name LIKE '%{}%' and sold=0".format(searchword))
+    items = Item.query.filter(Item.title.like(("%{}%".format(searchword))) & (Item.sold == False)).all()
     response = jsonify(items)
     response.status_code = 200
     return response
@@ -207,14 +190,14 @@ def search():
 @login_required
 def profile():
     """Show the user information and let the user change it """
+    user = User.query.get(session["user_id"])
     if request.method == "GET":
-        user = query_db("SELECT * FROM users WHERE id={}".format(session["user_id"]))[0]
         return render_template("profile.html", user=user)
-    update('users', 'id = {}'.format(session["user_id"]), (
-        'name', 'last_name', 'email'), ( \
-            request.form.get("firstname"), \
-            request.form.get("lastname"), \
-            request.form.get("email")))
+    user.firstname = request.form.get("firstname")
+    user.lastname = request.form.get("lastname")
+    user.email = request.form.get("email")
+    db.session.commit()
+
     flash('You have successfully updated your information')
     return redirect(url_for('profile'))
 
@@ -238,10 +221,9 @@ def getelements():
             error="please provide a limit and an offset for your request to be made."
             )
     if not categ:
-        items = query_db("SELECT * FROM items WHERE sold=0 LIMIT {} OFFSET {}".format(limit, offset))
+        items = Item.query.filter(Item.sold == False).limit(limit).offset(offset).all()
     else:
-        items = query_db(
-            "SELECT * FROM items WHERE category = '{}' and sold=0 LIMIT {}, {} ".format(categ, offset, limit))
+        items = Item.query.filter((Item.category == categ) & (Item.sold == False)).limit(limit).offset(offset).all()
     response = jsonify(items)
     response.status_code = 200
     return response
@@ -251,14 +233,16 @@ def getelements():
 @login_required
 def buy(id):
     """lets the user buys a specific item"""
-    item = query_db("SELECT * FROM items WHERE id=%d" %id)
+    item = Item.query.get(id)
     if not item:
         return render_template("mes.html", error="there is no such item")
-    elif item[0]["sold"] == 1:
+    elif item.sold == 1:
         return render_template("mes.html", error="the item that you are trying to buy is already sold")
-    elif item[0]['user_id'] == session['user_id']:
+    elif item.user_id == session['user_id']:
         return render_template("mes.html", error="you can't buy your own item.")
-    update('items', 'id = {}'.format(id), ('sold', 'buying_user'), (1, session["user_id"]))
+    item.sold = True
+    item.buying_user = session["user_id"]
+    db.session.commit()
     return render_template("mes.html", error="items bought successfully")
 
 
@@ -266,7 +250,7 @@ def buy(id):
 @login_required
 def currentsellings():
     """shows a list of the ites that the user is currently selling"""
-    items = query_db("SELECT * FROM items WHERE user_id=%d and sold=0" %session["user_id"])
+    items = Item.query.filter((Item.user_id == session["user_id"]) & (Item.sold == False))
     return render_template("currentsellings.html", items=items)
 
 
@@ -274,23 +258,21 @@ def currentsellings():
 @login_required
 def edit(id):
     """lets the user edit his currently selling items"""
-    item = query_db("SELECT * FROM items WHERE id=%d" %id)
+    item = Item.query.get(id)
     if not item:
         return render_template("mes.html", error="page not found")
-    elif item[0]['user_id'] != session['user_id']:
+    elif item.user_id != session['user_id']:
         return render_template("mes.html", error="you don't own the item that you are trying to edit")
     if request.method == "GET":
-        return render_template("edit.html", item=item[0],  categories=CATEGORIES)
+        return render_template("edit.html", item=item,  categories=app.config['CATEGORIES'])
     else:
         if not request.form.get("photo"):
-            update('items', 'id = {}'.format(id), (
-            'name', 'price', 'description', 'category'), ( \
-                request.form.get("name"), \
-                request.form.get("price"), \
-                request.form.get("description"), \
-                request.form.get("category")))
+            item.title = request.form.get("title")
+            item.price = request.form.get("price")
+            item.description = request.form.get("description")
+            item.category = request.form.get("category")
         else:
-            os.remove(UPLOAD_FOLDER/item["photos_dir"])
+            os.remove(app.config['UPLOAD_FOLDER']/item["photos_dir"])
             photo = request.files['photo']
             file_name = ""
 
@@ -298,7 +280,8 @@ def edit(id):
                 file_name = "%d.%s" %(uuid.uuid4(), photo.filename.rsplit('.', 1)[1].lower())
                 photo.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
 
-                update('items', 'id = {}'.format(id), 'photos_dir', file_name)
+                item.photo = file_name
+        db.session.commit()
         return redirect(url_for("currentsellings"))
 
 
@@ -306,10 +289,10 @@ def edit(id):
 @login_required
 def delete(id):
     """delete an item from the database"""
-    item = query_db("SELECT * FROM items WHERE id=%d" %id)
-    print(item)
-    if item and item[0]['user_id'] == session['user_id']:
-        db_delete("items", "id=%d" %id)
+    item = Item.query.get(id)
+    if item and item.user_id == session['user_id']:
+        db.session.delete(item)
+        db.session.commit()
         flash('You have successfully deleted the item')
         return redirect(url_for("currentsellings"))
     return render_template("mes.html", error="there has been an error deleting this item please try again later")
@@ -319,7 +302,7 @@ def delete(id):
 @login_required
 def history():
     """shows a list of the users purchases"""
-    items = query_db("SELECT * FROM items WHERE buying_user=%d" %session['user_id'])
+    items = Item.query.filter(Item.buying_user == session['user_id']).all()
     return render_template("history.html", items=items)
 
 
@@ -327,11 +310,10 @@ def history():
 @login_required
 def purchased_item(id):
     """shows information about the pruchased items"""
-    item = query_db("SELECT * FROM items WHERE id=%d" %id)
-    print(item)
-    if item and item[0] and item[0]['buying_user'] == session['user_id']:
-        return render_template("purchased_item.html", item=item[0])
-    elif item[0]['buying_user'] != session['user_id']:
+    item = Item.query.get(id)
+    if item and item.buying_user == session['user_id']:
+        return render_template("purchased_item.html", item=item)
+    elif item.buying_user != session['user_id']:
         return render_template("mes.html", error="you don't have permession to access this page")
     return render_template("mes.html", error="an error accord please try again later")
 
@@ -339,7 +321,6 @@ def purchased_item(id):
 
 @app.template_filter('strftime')
 def _jinja2_filter_datetime(date, fmt=None):
-    date = parser.parse(date)
     native = date.replace(tzinfo=None)
     format='%b %d, %Y'
     if native.strftime(format) == str(datetime.now().strftime('%b %d, %Y')):

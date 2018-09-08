@@ -9,7 +9,7 @@
     <form action="{{ url_for('edit', id=item['id']) }}" method="post" enctype="multipart/form-data">
         <fieldset>
             <div class="form-group">
-                <input autocomplete="off" autofocus class="form-control" name="name" value="{{item['name']}}" type="text"/>
+                <input autocomplete="off" autofocus class="form-control" name="title" value="{{item['title']}}" type="text"/>
             </div>
 
             <div class="form-group">
@@ -21,7 +21,7 @@
             </div>
 
             <div class="form-group">
-                <img src="{{ url_for('static', filename='photos/') }}/{{ item['photos_dir'] }}" alt="items image">
+                <img src="{{ url_for('static', filename='photos/') }}/{{ item['photo'] }}" alt="items image">
                 <input class="form-control" name="photo" placeholder="Change photo" type="file"/>
             </div>
 
