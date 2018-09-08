@@ -15,4 +15,5 @@ static/node_modules/
 pyvenv.cfg
 .venv
 pip-selfcheck.json
-buyit.db
+*.db
+migrations/
