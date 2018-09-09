@@ -29,7 +29,7 @@
                 {% endfor %}
             </ul>
 
-            {% if items.length == 8 %}
+            {% if items|length == 8 %}
             <div class="load-more">
                 <button onclick="loadMoreItems()">Load more</button>
                 <p style="display:none;">sorry but there is no more items</p>

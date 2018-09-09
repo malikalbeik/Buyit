@@ -4,7 +4,7 @@ Here all the tables, columns, and defualt values are defind and setup.
 """
 # pylint: disable=R0903
 from datetime import datetime
-from app import db
+from app import db, ma
 
 
 class User(db.Model):
@@ -46,7 +46,7 @@ class Item(db.Model):
     country = db.Column(db.String(32), unique=False, nullable=False)
     state = db.Column(db.String(32), unique=False, nullable=False)
     city = db.Column(db.String(32), unique=False, nullable=False)
-    item = db.relationship('Notification', backref='item', \
+    item = db.relationship('Notification', backref='notification', \
     lazy='dynamic', primaryjoin="Item.id == Notification.item_id")
 
     def __repr__(self):
@@ -62,3 +62,10 @@ class Notification(db.Model):
 
     def __repr__(self):
         return '<Notification {}>'.format(self.id)
+
+
+class ItemSchema(ma.ModelSchema):
+    """for flask_marshmallow to be able to jsonify Items"""
+    class Meta:
+        """let model be the Item class"""
+        model = Item

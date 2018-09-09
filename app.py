@@ -9,6 +9,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, redirect, flash, render_template, request, session, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from helpers import login_required, allowed_file
 from config import Config
@@ -20,10 +21,11 @@ from config import Config
 app = Flask(__name__) # pylint: disable=invalid-name
 app.config.from_object(Config)
 db = SQLAlchemy(app)  # pylint: disable=invalid-name
+ma = Marshmallow(app)  # pylint: disable=invalid-name
 migrate = Migrate(app, db)  # pylint: disable=invalid-name
 Session(app)
 
-from models import User, Item, Notification  # pylint: disable=C0413
+from models import User, Item, Notification, ItemSchema  # pylint: disable=C0413
 
 # Ensure responses aren't cached
 @app.after_request
@@ -267,9 +269,9 @@ def getelements():
     # else get items from the specifies category.
     else:
         items = Item.query.filter(
-            (Item.category == categ) & (Item.sold == 0)).limit(limit).offset(offset).all()
-    # return items as a json response with status code 200.
-    response = jsonify(items)
+            (Item.category == categ) & (Item.sold == 0)).limit(limit).offset(offset).as_dict().all()
+    # Using flask_marshmallow Itemschema return items as a json response with status code 200.
+    response = jsonify(ItemSchema(many=True).dump(items).data)
     response.status_code = 200
     return response
 

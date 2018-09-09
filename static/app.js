@@ -35,7 +35,7 @@ function loadMoreItems() {
             var li;
             res.map(function(element) {
                 li = document.createElement("li");
-                li.innerHTML = `<a href="items/${element.id}"><img src="/static/photos/${element.photos_dir}" alt="TO-DO"><h3>${element.name}</h3></a>`
+                li.innerHTML = `<a href="items/${element.id}"><img src="/static/photos/${element.photo}" alt="${element.title}'s photo"><h3>${element.title}</h3></a>`
                 ul.appendChild(li);
             })
             if (res.length != 8) {
