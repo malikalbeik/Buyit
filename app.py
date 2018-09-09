@@ -329,7 +329,7 @@ def edit(item_id):
         item_to_edit.category = request.form.get("category")
     # else if the user provided a new image delete the old one.
     else:
-        os.remove(app.config['UPLOAD_FOLDER']/item_to_edit.photos_dir)
+        os.remove(app.config['UPLOAD_FOLDER']/item_to_edit.photo)
         photo = request.files['photo']
         file_name = ""
     # if photo is valid then save it and add the name to the database.
@@ -353,6 +353,8 @@ def delete(item_id):
     item_to_delete = Item.query.get(item_id)
     # check if there is such item and if user owns this item
     if item_to_delete and item_to_delete.user_id == session['user_id']:
+        # remove the items photo from the server.
+        os.remove(app.config['UPLOAD_FOLDER']/item_to_delete.photo)
         # delete item from the database and commit changes.
         db.session.delete(item_to_delete)
         db.session.commit()
