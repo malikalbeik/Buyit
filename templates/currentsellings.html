@@ -11,7 +11,7 @@
             <ul class="{{ items_class }} elements">
                 {% for item in items %}
                     <li>
-                        <a href="{{ url_for('edit', id=item['id']) }}">
+                        <a href="{{ url_for('edit', item_id=item['id']) }}">
                             <img src="{{ url_for('static', filename='photos/') }}{{ item['photo'] }}" alt="{{ item['title'] }}'s photo'">
                             <h3>{{ item['title'] }}</h3>
                         </a>

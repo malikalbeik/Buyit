@@ -44,7 +44,7 @@ def shutdown_session(exception=None):  # pylint: disable=w0613
 @app.route("/")
 def index():
     """Show a list of items to buy"""
-    items = Item.query.filter(not Item.sold).limit(8).all()
+    items = Item.query.filter(Item.sold == 0).limit(8).all()
     return render_template("index.html", \
         categories=app.config['CATEGORIES'], \
         items_class="items", items=items)
@@ -208,7 +208,7 @@ def search():
         # search the database for all the items that have names similar to the search word
         # and surf them as a webpage.
         items = Item.query.filter(
-            (Item.title.like("%{}%".format(searchword))) & (not Item.sold)).all()
+            (Item.title.like("%{}%".format(searchword))) & (Item.sold == 0)).all()
         return render_template("index.html", items=items, categories=app.config['CATEGORIES'])
     # if the user doesn't provide a search word and a boolean for json return error message.
     if not searchword:
@@ -216,7 +216,7 @@ def search():
     # search the database for all the items that have names similar to the search word
     # and surf them as a json response with status code 200.
     items = Item.query.filter(
-        Item.title.like(("%{}%".format(searchword))) & (not Item.sold)).all()
+        Item.title.like(("%{}%".format(searchword))) & (Item.sold == 0)).all()
     response = jsonify(items)
     response.status_code = 200
     return response
@@ -262,11 +262,12 @@ def getelements():
             )
     # if no category specified get items from all the categories.
     if not categ:
-        items = Item.query.filter(not Item.sold).limit(limit).offset(offset).all()
+        items = Item.query.filter(Item.sold == 0).limit(
+            limit).offset(offset).all()
     # else get items from the specifies category.
     else:
         items = Item.query.filter(
-            (Item.category == categ) & (not Item.sold)).limit(limit).offset(offset).all()
+            (Item.category == categ) & (Item.sold == 0)).limit(limit).offset(offset).all()
     # return items as a json response with status code 200.
     response = jsonify(items)
     response.status_code = 200
@@ -305,7 +306,8 @@ def buy(item_id):
 @login_required
 def currentsellings():
     """shows a list of the ites that the user is currently selling"""
-    items = Item.query.filter((Item.user_id == session["user_id"]) & (not Item.sold)).all()
+    items = Item.query.filter(
+        (Item.user_id == session["user_id"]) & (Item.sold == 0)).all()
     return render_template("currentsellings.html", items=items)
 
 
