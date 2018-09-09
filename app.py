@@ -72,7 +72,7 @@ def login():
         if not request.form.get("password"):
             return render_template("mes.html", error="must provide password")
 
-        # Query database for username
+        # Query database for user
         user = User.query.filter(User.username == username).first_or_404()
 
         # Ensure username exists and password is correct
@@ -116,6 +116,11 @@ def register():
         # add user to the database session and commit.
         db.session.add(user)
         db.session.commit()
+
+        # Sign user in.
+        session["user_id"] = user.id
+        session["user_avatar"] = user.avatar
+        session["user_name"] = user.username
 
         # redirect user to home page
         return redirect(url_for("index"))
