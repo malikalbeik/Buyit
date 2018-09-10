@@ -10,23 +10,23 @@
             <fieldset>
     
             <div class="form-group">
-                <input autocomplete="off" autofocus class="form-control" name="title" placeholder="Title" maxlength="18" type="text"/>
+                <input autocomplete="off" autofocus class="form-control" name="title" placeholder="Title" maxlength="18" type="text" required/>
             </div>
 
             <div class="form-group">
-                <input class="form-control" name="price" placeholder="Price" type="number"/>
+                <input class="form-control" name="price" placeholder="Price" type="number" required/>
             </div>
 
             <div class="form-group">
-                <input class="form-control" name="description" placeholder="Description" type="text"/>
+                <input class="form-control" name="description" placeholder="Description" type="text" required/>
             </div>
 
             <div class="form-group">
-                <input class="form-control" name="photo" placeholder="Upload photo" type="file"/>
+                <input class="form-control" name="photo" placeholder="Upload photo" type="file" required/>
             </div>
 
             <div class="form-group">
-                <select name="category" >
+                <select name="category" required>
                     <option value="category" disabled selected>category</option>
                     {% for category in categories %}
                         <option value="{{ category }}">{{ category }}</option>
