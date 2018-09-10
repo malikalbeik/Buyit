@@ -12,10 +12,13 @@
 var offset = 8;
 const incrementNum = 8;
 
-// Initiating Awesomplete in #seachInput with a minimum characters of 1.
-var awesomplete = new Awesomplete(document.getElementById("searchInput"), {
-	minChars: 1,
-});
+// if the search input is in the DOM.
+if (document.getElementById("searchInput")) {
+    // Initiating Awesomplete in #seachInput with a minimum characters of 1.
+    var awesomplete = new Awesomplete(document.getElementById("searchInput"), {
+        minChars: 1,
+    });
+}
 
 
 /**
@@ -92,7 +95,7 @@ var awesompleteComplete = debounce(function(value) {
         fetch(`http://127.0.0.1:5000/search?search=${value}&json=true`)
         .then((resp) => resp.json())
         .then((data) => {
-            awesomplete.list = data.map(val => ({value: val.name, label: val.name}));
+            awesomplete.list = data.map(val => ({value: val.title, label: val.title}));
         })
     }
 }, 500)
