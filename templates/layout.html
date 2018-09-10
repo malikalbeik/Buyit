@@ -13,8 +13,6 @@
 
         <link rel="stylesheet" href="/static/node_modules/awesomplete/awesomplete.css" />
 
-        <script src="/static/node_modules/awesomplete/awesomplete.js" async></script>
-
         <link href="/static/styles.css" rel="stylesheet"/>
 
         <title>{% block title %}{% endblock %}</title>
@@ -26,12 +24,6 @@
         <header>
             <nav>
                 <h1 class="logo" ><a href="{{ url_for('index') }}">Buyit</a></h1>
-                <div class="search-container">
-                    <form action="/search">
-                        <input type="text" placeholder="Search.." name="search" id="searchInput" oninput="awesompleteComplete(this.value)">
-                        <button type="submit"><i class="fa fa-search"></i></button>
-                    </form>
-                </div>
                 {% if session.user_id %}
                     <ul>
                         <li class="avatar">
@@ -71,6 +63,7 @@
                 </div>
                 <ul>
                     <li><a href="{{ url_for('profile') }}"><img src="{{ url_for('static', filename='website_photos/Avatar.png') }}" alt="user avatar"> Profile</a></li>
+                    <li class="sell_button-sidemenu" style="display:none"><a class="sell_link" href="{{ url_for('sell') }}"><img src="{{ url_for('static', filename='website_photos/sell.png') }}" alt="Sell Your Stuff icon"> Sell Your Stuff</a></li>
                     <li><a href="{{ url_for('currentsellings') }}"><img src="{{ url_for('static', filename='website_photos/currentsellings.png') }}" alt="current sellings icon"> Current Sellings</a></li>
                     <li><a href="{{ url_for('history') }}"><img src="{{ url_for('static', filename='website_photos/history.png') }}" alt="Purchase history icon"> Purchase History</a></li>
                     <li><a href="{{ url_for('notifications') }}"><img src="{{ url_for('static', filename='website_photos/notifications.png') }}" alt="Notifications icon">Notifications</a></li>

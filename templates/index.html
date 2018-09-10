@@ -5,7 +5,14 @@
 {% endblock %}
 
 {% block main %}
+    <script src="/static/node_modules/awesomplete/awesomplete.js" async></script>
     <div class="index">
+        <div class="search-container">
+            <form action="/search">
+                <input type="text" placeholder="Search.." name="search" id="searchInput" oninput="awesompleteComplete(this.value)">
+                <button type="submit"><i class="fa fa-search"></i></button>
+            </form>
+        </div>
         <ul class="categories">
             {% for category in categories %}
             <li>

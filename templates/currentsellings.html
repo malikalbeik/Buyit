@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block main %}
-    <h2>Current Sellings:</h2>
-    <div class="index">
+    <div class="current-seelings-container">
+        <h2>Current Sellings:</h2>
         {% if items %}
             <ul class="{{ items_class }} elements">
                 {% for item in items %}
