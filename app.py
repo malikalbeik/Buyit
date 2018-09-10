@@ -219,7 +219,7 @@ def search():
     # and surf them as a json response with status code 200.
     items = Item.query.filter(
         Item.title.like(("%{}%".format(searchword))) & (Item.sold == 0)).all()
-    response = jsonify(items)
+    response = jsonify((ItemSchema(many=True).dump(items).data))
     response.status_code = 200
     return response
 
