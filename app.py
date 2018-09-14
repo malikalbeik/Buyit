@@ -234,6 +234,19 @@ def profile():
         return render_template("profile.html", user=user)
 
     # if request.method == "POST" modify current users data and commit them to the database.
+    # check if the user provided a new avatar
+    if request.files['avatar']:
+        photo = request.files['avatar']
+    # if photo is valid then save it and add the name to the database.
+        if photo and allowed_file(photo.filename):
+            file_name = "%d.%s" % (
+                uuid.uuid4(), photo.filename.rsplit('.', 1)[1].lower())
+            photo.save(os.path.join(
+                app.config['UPLOAD_FOLDER_AVATAR'], file_name))
+            os.remove("%s/%s" % (app.config['UPLOAD_FOLDER_AVATAR'], user.avatar))
+            user.avatar = file_name
+            session["user_avatar"] = user.avatar
+
     user.firstname = request.form.get("firstname")
     user.lastname = request.form.get("lastname")
     user.email = request.form.get("email")
@@ -331,21 +344,24 @@ def edit(item_id):
         return render_template("edit.html", item=item_to_edit, categories=app.config['CATEGORIES'])
     # else if request.method == "GET"
     # if the user didn't provide a new image the just update the item.
-    if not request.form.get("photo"):
+    if not request.files['photo']:
         item_to_edit.title = request.form.get("title")
         item_to_edit.price = request.form.get("price")
         item_to_edit.description = request.form.get("description")
         item_to_edit.category = request.form.get("category")
     # else if the user provided a new image delete the old one.
     else:
-        os.remove(app.config['UPLOAD_FOLDER']/item_to_edit.photo)
+        os.remove("%s/%s" % (app.config['UPLOAD_FOLDER'], item_to_edit.photo))
         photo = request.files['photo']
         file_name = ""
     # if photo is valid then save it and add the name to the database.
         if photo and allowed_file(photo.filename):
             file_name = "%d.%s" %(uuid.uuid4(), photo.filename.rsplit('.', 1)[1].lower())
             photo.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
-
+            item_to_edit.title = request.form.get("title")
+            item_to_edit.price = request.form.get("price")
+            item_to_edit.description = request.form.get("description")
+            item_to_edit.category = request.form.get("category")
             item_to_edit.photo = file_name
     # commit changes on the database.
     db.session.commit()
@@ -363,7 +379,7 @@ def delete(item_id):
     # check if there is such item and if user owns this item
     if item_to_delete and item_to_delete.user_id == session['user_id']:
         # remove the items photo from the server.
-        os.remove(app.config['UPLOAD_FOLDER']/item_to_delete.photo)
+        os.remove("%s/%s" %(app.config['UPLOAD_FOLDER'], item_to_delete.photo))
         # delete item from the database and commit changes.
         db.session.delete(item_to_delete)
         db.session.commit()
