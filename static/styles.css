@@ -226,8 +226,8 @@ nav li a {
 }
 
 .item-container img {
-    min-width: 250px;
-    min-height: 250px;
+    width: 350px;
+    height: 350px;
     margin-right: 50px;
     border-radius: 25px;
 }
@@ -242,13 +242,19 @@ nav li a {
     color: white;
 }
 
-@media only screen and (max-width: 550px) {
+@media only screen and (max-width: 650px) {
     .item-container img {
+        width: 200px;
+        height: 200px;
         margin: auto;
         margin-bottom: 50px;
     }
+    .buy-button {
+        margin-left: calc(50% - 50px);
+    }
     .item-container {
         flex-direction: column;
+        text-align: center;
     }
 }
 
