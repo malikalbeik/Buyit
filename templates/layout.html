@@ -6,14 +6,17 @@
         <!-- Required meta tags -->
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
-
-        <link rel="stylesheet" href="/static/node_modules/awesomplete/awesomplete.css" />
-
-        <link href="/static/styles.css" rel="stylesheet"/>
+        <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/') }}awesomplete/awesomplete.css" />
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='website_photos/') }}apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='website_photos/') }}favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='website_photos/') }}favicon-16x16.png">
+        <link rel="manifest" href="{{ url_for('static', filename='website_photos/') }}site.webmanifest">
+        <link rel="mask-icon" href="{{ url_for('static', filename='website_photos/') }}safari-pinned-tab.svg" color="#5bbad5">
+        <meta name="msapplication-TileColor" content="#da532c">
+        <meta name="theme-color" content="#ffffff">
+        <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet"/>
 
         <title>{% block title %}{% endblock %}</title>
 
@@ -78,7 +81,7 @@
         <footer class="page-footer">
             <p>All rights reserved. <a href="https://malikalbeik.com/">MALIK ALBEIK</a></p>
         </footer>
-
+        <script src="{{ url_for('static', filename='node_modules/') }}awesomplete/awesomplete.js"></script>
         <script src="{{ url_for('static', filename='app.js') }}" async></script>
     </body>
 
